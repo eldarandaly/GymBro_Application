@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "987559794584",
+    "project_id": "gymbro-81509",
+    "storage_bucket": "gymbro-81509.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987559794584:android:6ea0042b9689d59f397ded",
+        "android_client_info": {
+          "package_name": "com.example.gymbro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "987559794584-k0iv6v3bg3sc7gqam7mu9s6n56n0q2eh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiPKw7cttxy8O_JXgJ_xY1fi5uWUYAgVo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987559794584-k0iv6v3bg3sc7gqam7mu9s6n56n0q2eh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
