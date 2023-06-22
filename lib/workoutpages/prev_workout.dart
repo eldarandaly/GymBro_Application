@@ -114,6 +114,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
 import 'package:intl/intl.dart';
 
@@ -165,6 +166,11 @@ class PrevWorkout extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
+              // chartWidget(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: buildBarChart(),
+              ),
               Divider(),
               Row(
                 children: [
@@ -194,6 +200,10 @@ class PrevWorkout extends StatelessWidget {
                 ],
               ),
               Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                      10.0), // Set the desired border radius
+                ),
                 elevation: 10,
                 child: ListTile(
                   title: Text(
@@ -247,8 +257,102 @@ class PrevWorkout extends StatelessWidget {
                   ),
                 ),
               ),
-              // chartWidget(),
+              // createChart(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildHorizontalScrollView() {
+    return Container(
+      height: 400,
+      width:
+          SizeConfig.screenWidth, // Set the desired height of the scroll view
+      child: ListView(
+        // scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          SizedBox(
+            width: SizeConfig.screenWidth,
+            child: Center(child: buildBarChart()),
+          ),
+          // SizedBox(
+          //   width: SizeConfig
+          //       .screenWidth, // Set the desired width of the second widget
+          //   child: Center(child: chartWidget()),
+          // ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildBarChart() {
+    final List<String> weekdays = [
+      'sun',
+      'mon',
+      'tue',
+      'wed',
+      'thu',
+      'fri',
+      'sat'
+    ];
+    final List<double> volumes = [
+      5000,
+      3000,
+      6000,
+      2000,
+      4000,
+      5000,
+      7000,
+      6600,
+      10000,
+    ];
+    final int weeks = 1;
+    final int daysPerWeek = weekdays.length;
+
+    return Container(
+      // color: Colors.white24,
+      height: 300,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.center,
+          groupsSpace: 19,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            // show: true,
+            bottomTitles: SideTitles(
+              showTitles: true,
+              getTextStyles: (context, value) =>
+                  const TextStyle(color: Colors.white, fontSize: 14),
+              margin: 16,
+              getTitles: (double value) {
+                final week = (value ~/ daysPerWeek) + 1;
+                final day = weekdays[value.toInt() % daysPerWeek];
+                return (value.toInt() % daysPerWeek == 0) ? 'Week $week' : '';
+              },
+            ),
+            leftTitles: SideTitles(
+              interval: 1000,
+              showTitles: true,
+              getTextStyles: (context, value) =>
+                  const TextStyle(color: Colors.white, fontSize: 14),
+              getTitles: (value) {
+                // Divide the y-axis values by 1,000 to represent thousands
+                return '${(value ~/ 1000)}k';
+              },
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          barGroups: List.generate(
+            volumes.length,
+            (i) => BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                    y: volumes[i], colors: [Colors.blue, Colors.green]),
+              ],
+            ),
           ),
         ),
       ),

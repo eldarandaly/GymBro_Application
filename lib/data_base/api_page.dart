@@ -1,278 +1,11 @@
-// import 'dart:convert';
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:gymbro/home/bottom_nav.dart';
-// import 'package:gymbro/home/my_routine_page.dart';
-// import 'package:http/http.dart' as http;
-
-// class ApiClass extends StatefulWidget {
-//   @override
-//   _ApiClassState createState() => _ApiClassState();
-// }
-
-// class _ApiClassState extends State<ApiClass> {
-//   List<dynamic> exercises = [];
-//   List<String> equipment = [
-//     "assisted",
-//     "band",
-//     "barbell",
-//     "body weight",
-//     "bosu ball",
-//     "cable",
-//     "dumbbell",
-//     "elliptical machine",
-//     "ez barbell",
-//     "hammer",
-//     "kettlebell",
-//     "leverage machine",
-//     "medicine ball",
-//     "olympic barbell",
-//     "resistance band",
-//     "roller",
-//     "rope",
-//     "skierg machine",
-//     "sled machine",
-//     "smith machine",
-//     "stability ball",
-//     "stationary bike",
-//     "stepmill machine",
-//     "tire",
-//     "trap bar",
-//     "upper body ergometer",
-//     "weighted",
-//     "wheel roller"
-//   ]; // Example body parts
-//   List<String> targets = [
-//     "abductors",
-//     "abs",
-//     "adductors",
-//     "biceps",
-//     "calves",
-//     "cardiovascular system",
-//     "delts",
-//     "forearms",
-//     "glutes",
-//     "hamstrings",
-//     "lats",
-//     "levator scapulae",
-//     "chest",
-//     "quads",
-//     "serratus anterior",
-//     "spine",
-//     "traps",
-//     "triceps",
-//     "upper back"
-//   ];
-//   List<String> selectedBodyParts = [];
-//   List<String> selectedTargets = [];
-//   List<String> selectedExercises = [];
-//   List<String> selectedExeGifs = [];
-//   @override
-//   void initState() {
-//     super.initState();
-//     fetchExercises();
-//   }
-
-//   Future<void> fetchExercises() async {
-//     final apiKey = 'e74a38207dmsh4c7c7032cb8ee56p18ca6djsne27f29a927c7';
-//     final exercisesapiUrl = "https://exercisedb.p.rapidapi.com/exercises";
-//     final response = await http.get(
-//       Uri.parse(exercisesapiUrl),
-//       headers: {
-//         'X-RapidAPI-Key': apiKey,
-//       },
-//     );
-
-//     if (response.statusCode == 200) {
-//       final decodedResponse = jsonDecode(response.body);
-//       setState(() {
-//         exercises = decodedResponse;
-//       });
-//     } else {
-//       throw Exception('Failed to fetch exercises');
-//     }
-//   }
-
-//   void _toggleExercise(String exerciseName) {
-//     setState(() {
-//       if (selectedExercises.contains(exerciseName)) {
-//         selectedExercises.remove(exerciseName);
-//       } else {
-//         selectedExercises.add(exerciseName);
-//       }
-//     });
-//   }
-
-//   void _toggleGifs(String gifUrl) {
-//     setState(() {
-//       if (selectedExeGifs.contains(gifUrl)) {
-//         selectedExeGifs.remove(gifUrl);
-//       } else {
-//         selectedExeGifs.add(gifUrl);
-//       }
-//     });
-//   }
-
-//   void _openGif(String gifUrl) {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return Dialog(
-//           child: Image.network(gifUrl),
-//         );
-//       },
-//     );
-//   }
-
-//   // void _navigateToRoutinePage() {
-//   //   Navigator.push(
-//   //     context,
-//   //     MaterialPageRoute(
-//   //       builder: (context) => WorkoutPage(
-//   //         selectedExeList: selectedExercises,
-//   //       ),
-//   //     ),
-//   //   );
-//   // }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       // bottomNavigationBar: const BottomBar(),
-//       appBar: AppBar(
-//         title: Text('Workout Routines'),
-//       ),
-//       body: Column(
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: TextField(
-//               style: TextStyle(
-//                 fontFamily: GoogleFonts.balooDa2().fontFamily,
-//                 fontSize: 24.0,
-//                 color: Colors.blue,
-//               ),
-//               decoration: const InputDecoration(
-//                   labelStyle: TextStyle(color: Colors.blue),
-//                   prefixIcon: Icon(Icons.search),
-//                   labelText: 'Serach',
-//                   border: OutlineInputBorder(
-//                     borderRadius: BorderRadius.all(Radius.circular(10)),
-//                   )),
-//             ),
-//           ),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//             children: [
-//               DropdownButton<String>(
-//                 value:
-//                     selectedBodyParts.isNotEmpty ? selectedBodyParts[0] : null,
-//                 hint: Text('equipment'),
-//                 items: equipment.map((String equipments) {
-//                   return DropdownMenuItem<String>(
-//                     value: equipments,
-//                     child: Text(equipments),
-//                   );
-//                 }).toList(),
-//                 onChanged: (String? value) {
-//                   setState(() {
-//                     if (value != null) {
-//                       selectedBodyParts = [value];
-//                     } else {
-//                       selectedBodyParts = [];
-//                     }
-//                   });
-//                 },
-//               ),
-//               DropdownButton<String>(
-//                 value: selectedTargets.isNotEmpty ? selectedTargets[0] : null,
-//                 hint: Text('Target'),
-//                 items: targets.map((String target) {
-//                   return DropdownMenuItem<String>(
-//                     value: target,
-//                     child: Text(target),
-//                   );
-//                 }).toList(),
-//                 onChanged: (String? value) {
-//                   setState(() {
-//                     if (value != null) {
-//                       selectedTargets = [value];
-//                     } else {
-//                       selectedTargets = [];
-//                     }
-//                   });
-//                 },
-//               ),
-//             ],
-//           ),
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: exercises.length,
-//               itemBuilder: (BuildContext context, int index) {
-//                 final exercise = exercises[index];
-
-//                 // Apply filters
-//                 if (selectedBodyParts.isNotEmpty &&
-//                     !selectedBodyParts.contains(exercise['equipment'])) {
-//                   return SizedBox
-//                       .shrink(); // Skip exercises that don't match the selected body parts
-//                 }
-//                 if (selectedTargets.isNotEmpty &&
-//                     !selectedTargets.contains(exercise['target'])) {
-//                   return SizedBox
-//                       .shrink(); // Skip exercises that don't match the selected targets
-//                 }
-//                 final exerciseName = exercise['name'] as String;
-//                 final isChecked = selectedExercises.contains(exerciseName);
-//                 final exerciseGif = exercise['gifUrl'] as String;
-//                 final isCheckedGif = selectedExercises.contains(exerciseGif);
-//                 return ListTile(
-//                   onTap: () => _openGif(exercise['gifUrl']),
-//                   title: Padding(
-//                     padding: const EdgeInsets.all(8.0),
-//                     child: Column(
-//                       children: [
-//                         CheckboxListTile(
-//                           activeColor: Colors.blue,
-//                           value: isChecked,
-//                           onChanged: (bool? value) {
-//                             _toggleExercise(exerciseName);
-//                             _toggleGifs(exerciseGif);
-//                           },
-//                           title: Text(exerciseName),
-//                           controlAffinity: ListTileControlAffinity.trailing,
-//                         ),
-//                         // Text(exercise['bodyPart']),
-//                         // Text(exercise['equipment']),
-//                         // Text(exercise['target']),
-//                         Divider(),
-//                       ],
-//                     ),
-//                   ),
-//                   leading: Image.network(
-//                     exercise['gifUrl'],
-//                     scale: 1,
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Navigator.pop(context, [selectedExercises, selectedExeGifs]);
-//         },
-//         child: Icon(Icons.check),
-//       ),
-//     );
-//   }
-// }
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:carousel_slider/carousel_slider.dart';
 
 class ApiClass extends StatefulWidget {
   @override
@@ -280,37 +13,25 @@ class ApiClass extends StatefulWidget {
 }
 
 class _ApiClassState extends State<ApiClass> {
-  List<dynamic> exercises = [];
+  List<dynamic> exercises = Exercise.exercises;
+  Map<String?, dynamic> exercisesImages = Exercise.images;
   List<String> equipment = [
     "assisted",
-    // "band",
+    "band",
     "barbell",
-    "body weight",
-    // "bosu ball",
+    "body only",
+    "kettlebells",
     "cable",
     "dumbbell",
-    // "elliptical machine",
-    "ez barbell",
-    // "hammer",
-    // "kettlebell",
-    // "leverage machine",
-    // "medicine ball",
-    // "olympic barbell",
+    "cable",
     "resistance band",
-    // "roller",
-    "rope",
-    // "skierg machine",
-    // "sled machine",
+    "machine",
     "smith machine",
     "other",
-    // "stability ball",
-    // "stationary bike",
-    // "stepmill machine",
-    // "tire",
-    // "trap bar",
-    // "upper body ergometer",
-    // "weighted",
-    // "wheel roller"
+    "e-z curl bar",
+    "foam roll",
+    "medicine ball",
+    "exercise ball",
   ]; // Example body parts
   List<String> targets = [
     "abductors",
@@ -333,39 +54,49 @@ class _ApiClassState extends State<ApiClass> {
     "triceps",
     "upper back"
   ];
+
   List<String> selectedEquipment = [];
   List<String> selectedTargets = [];
   List<String> selectedExercises = [];
   List<String> selectedExeGifs = [];
+
   String searchQuery = '';
   String selectedTarget = '';
   String selectedEq = '';
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    fetchExercises();
+    // fetchExercises();
+    Exercise.loadExerciseData();
   }
 
-  Future<void> fetchExercises() async {
-    final apiKey = 'e74a38207dmsh4c7c7032cb8ee56p18ca6djsne27f29a927c7';
-    final exercisesapiUrl = "https://exercisedb.p.rapidapi.com/exercises";
-    final response = await http.get(
-      Uri.parse(exercisesapiUrl),
-      headers: {
-        'X-RapidAPI-Key': apiKey,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final decodedResponse = jsonDecode(response.body);
-      setState(() {
-        exercises = decodedResponse;
-      });
-    } else {
-      throw Exception('Failed to fetch exercises');
-    }
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
+
+  // Future<void> fetchExercises() async {
+  //   final apiKey = 'e74a38207dmsh4c7c7032cb8ee56p18ca6djsne27f29a927c7';
+  //   final exercisesapiUrl = "https://exercisedb.p.rapidapi.com/exercises";
+  //   final response = await http.get(
+  //     Uri.parse(exercisesapiUrl),
+  //     headers: {
+  //       'X-RapidAPI-Key': apiKey,
+  //     },
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     final decodedResponse = jsonDecode(response.body);
+  //     setState(() {
+  //       exercises = decodedResponse;
+  //     });
+  //   } else {
+  //     throw Exception('Failed to fetch exercises');
+  //   }
+  // }
 
   String getImageForTarget(String target) {
     switch (target) {
@@ -432,12 +163,51 @@ class _ApiClassState extends State<ApiClass> {
     });
   }
 
-  void _openGif(String gifUrl) {
+  // void _openGif(ImageProvider<Object> gifUrl) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         child: Image(image: gifUrl),
+  //       );
+  //     },
+  //   );
+  // }
+  void _openGif(List<ImageProvider<Object>> gifUrls) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          child: Image.network(gifUrl),
+        return GestureDetector(
+          onTap: () {
+            // Unfocus any active text fields
+            FocusScope.of(context).unfocus();
+          },
+          child: Dialog(
+            child: Container(
+              width: 400,
+              height: 400,
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  autoPlayInterval: const Duration(seconds: 3),
+                  initialPage: 0,
+                  enableInfiniteScroll: false,
+                  aspectRatio: 1.0,
+                  viewportFraction: 1.0,
+                  autoPlay: true,
+                ),
+                items: gifUrls
+                    .map(
+                      (gifUrl) => Container(
+                        child: Image(
+                          image: gifUrl,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -535,13 +305,21 @@ class _ApiClassState extends State<ApiClass> {
     );
   }
 
+  _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        searchQuery = query;
+        selectedTargets = targets
+            .where((target) =>
+                target.toLowerCase().contains(searchQuery.toLowerCase()))
+            .toList();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<String> filteredTargets = targets
-        .where((target) =>
-            target.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
@@ -584,37 +362,13 @@ class _ApiClassState extends State<ApiClass> {
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                   ),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
+                onChanged: _onSearchChanged,
               ),
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // DropdownButton<String>(
-              //   value:
-              //       selectedEquipment.isNotEmpty ? selectedEquipment[0] : null,
-              //   hint: Text('Equipment'),
-              //   items: equipment.map((String equipment) {
-              //     return DropdownMenuItem<String>(
-              //       value: equipment,
-              //       child: Text(equipment),
-              //     );
-              //   }).toList(),
-              //   onChanged: (String? value) {
-              //     setState(() {
-              //       if (value != null) {
-              //         selectedEquipment = [value];
-              //       } else {
-              //         selectedEquipment = [];
-              //       }
-              //     });
-              //   },
-              // ),
               SizedBox(
                 width: SizeConfig.screenWidth / 2 - 30,
                 child: TextButton(
@@ -645,7 +399,6 @@ class _ApiClassState extends State<ApiClass> {
                   ),
                 ),
               ),
-
               SizedBox(
                 width: SizeConfig.screenWidth / 2 - 30,
                 child: TextButton(
@@ -696,20 +449,25 @@ class _ApiClassState extends State<ApiClass> {
               itemCount: exercises.length,
               itemBuilder: (BuildContext context, int index) {
                 final exercise = exercises[index];
+                final imagesGifs = exercisesImages;
 
                 // Apply filters
                 if (selectedEquipment.isNotEmpty &&
-                    !selectedEquipment.contains(exercise['equipment'])) {
+                    !selectedEquipment.contains(exercise.equipment)) {
                   return SizedBox.shrink();
                 }
                 if (selectedTargets.isNotEmpty &&
-                    !selectedTargets.contains(exercise['target'])) {
+                    !selectedTargets.contains(exercise.primaryMuscles.first)) {
                   return SizedBox.shrink();
                 }
 
-                final exerciseName = exercise['name'] as String;
-                final exerciseGif = exercise['gifUrl'] as String;
+                final exerciseName = exercise.name as String;
+                final _exerciseName =
+                    exercise.name?.replaceAll(RegExp(r'[\/\s]'), '_');
 
+                final exerciseGif = imagesGifs[_exerciseName]
+                    [0]; //exercise['gifUrl'] as String;
+                final exerciseGif2 = imagesGifs[_exerciseName];
                 // Check if exercise name contains the search query
                 if (exerciseName
                     .toLowerCase()
@@ -718,7 +476,7 @@ class _ApiClassState extends State<ApiClass> {
                   final isCheckedGif = selectedExercises.contains(exerciseGif);
 
                   return ListTile(
-                    onTap: () => _openGif(exercise['gifUrl']),
+                    onTap: () => _openGif(exerciseGif2),
                     title: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -728,7 +486,7 @@ class _ApiClassState extends State<ApiClass> {
                             value: isChecked,
                             onChanged: (bool? value) {
                               _toggleExercise(exerciseName);
-                              _toggleGifs(exerciseGif);
+                              // _toggleGifs(exerciseGif);
                             },
                             title: Text(
                               exerciseName,
@@ -744,10 +502,12 @@ class _ApiClassState extends State<ApiClass> {
                         ],
                       ),
                     ),
-                    leading: ClipOval(
-                      child: Image.network(
-                        exerciseGif,
-                        scale: 1,
+                    leading: Container(
+                      child: Image(
+                        width: 100,
+                        height: 100,
+                        image: exerciseGif,
+                        fit: BoxFit.fill,
                       ),
                     ),
                   );

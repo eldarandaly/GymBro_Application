@@ -1,11 +1,15 @@
 import 'dart:convert';
 
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymbro/constants.dart';
 import 'package:gymbro/data_base/api_page.dart';
+import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/data_base/sqfLite.dart';
+import 'package:gymbro/home/bottom_nav.dart';
 import 'package:gymbro/home/my_routine_page.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/finish_workout.dart';
@@ -14,6 +18,7 @@ import 'package:line_icons/line_icons.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mdi/mdi.dart';
 
 import '../feed/feedPage.dart';
 
@@ -219,7 +224,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
   Timer? _timer;
   String _elapsedTime = '00:00:00';
   final fieldText = TextEditingController();
-
+  Map<String?, dynamic> exercisesImages = Exercise.images;
   @override
   void initState() {
     super.initState();
@@ -273,12 +278,12 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
             DataCell(Text('${_exerciseCounters[exerciseIndex].last}')),
             DataCell(TextField(
               controller: weightController,
-              decoration: InputDecoration.collapsed(hintText: 'KG'),
+              decoration: const InputDecoration.collapsed(hintText: 'KG'),
               keyboardType: TextInputType.number,
             )),
             DataCell(TextField(
               controller: repsController,
-              decoration: InputDecoration.collapsed(hintText: 'Reps'),
+              decoration: const InputDecoration.collapsed(hintText: 'Reps'),
               keyboardType: TextInputType.number,
             )),
             DataCell(Checkbox(
@@ -291,7 +296,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 });
               },
             )),
-            DataCell(Icon(Icons.delete)),
+            // const DataCell(Icon(Icons.delete)),
           ],
         ),
       );
@@ -307,19 +312,58 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
   void _startTimer() {
     _stopwatch.start();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _elapsedTime = _formatElapsedTime(_stopwatch.elapsed);
       });
     });
   }
 
-  void _openGif(String gifUrl) {
+  // void _openGif(ImageProvider<Object> gifUrl) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         child: Image(image: gifUrl),
+  //       );
+  //     },
+  //   );
+  // }
+  void _openGif(List<ImageProvider<Object>> gifUrls) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          child: Image.network(gifUrl),
+        return GestureDetector(
+          onTap: () {
+            // Unfocus any active text fields
+            FocusScope.of(context).unfocus();
+          },
+          child: Dialog(
+            child: Container(
+              width: 400,
+              height: 400,
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  autoPlayInterval: const Duration(seconds: 3),
+                  initialPage: 0,
+                  enableInfiniteScroll: false,
+                  aspectRatio: 1.0,
+                  viewportFraction: 1.0,
+                  autoPlay: true,
+                ),
+                items: gifUrls
+                    .map(
+                      (gifUrl) => Container(
+                        child: Image(
+                          image: gifUrl,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -426,17 +470,40 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('LetsGo'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => _finishWorkout(context),
-                child: Text('Finish'),
-              ),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(80.0),
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            title: Column(
+              children: [
+                SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('LetsGo'),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                        onPressed: () => _finishWorkout(context),
+                        child: const Text('Finish'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+            // actions: [
+            //   Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: ElevatedButton(
+            //       onPressed: () => _finishWorkout(context),
+            //       child: const Text('Finish'),
+            //     ),
+            //   ),
+            // ],
+          ),
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,16 +517,19 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.timer,
-                          color: Colors.blue,
+                          color: Colors.white,
                         ),
-                        Text(
-                          ' $_elapsedTime',
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.asap().fontFamily,
-                            fontSize: 20.0,
-                            color: Colors.white,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            ' $_elapsedTime',
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.asap().fontFamily,
+                              fontSize: 20.0,
+                              color: Colors.blue,
+                            ),
                           ),
                         ),
                         // Spacer(),
@@ -474,16 +544,19 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                           'Volume',
                           style: TextStyle(
                             fontFamily: GoogleFonts.asap().fontFamily,
-                            fontSize: 20.0,
-                            color: Colors.blue,
+                            fontSize: 16.0,
+                            color: Colors.white,
                           ),
                         ),
-                        Text(
-                          '$_totalWeight KG',
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.asap().fontFamily,
-                            fontSize: 18.0,
-                            color: Colors.white,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            '$_totalWeight kg',
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.asap().fontFamily,
+                              fontSize: 20.0,
+                              color: Colors.white,
+                            ),
                           ),
                         )
                       ],
@@ -497,16 +570,19 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                           'Total Sets',
                           style: TextStyle(
                             fontFamily: GoogleFonts.asap().fontFamily,
-                            fontSize: 20.0,
-                            color: Colors.blue,
+                            fontSize: 16.0,
+                            color: Colors.white,
                           ),
                         ),
-                        Text(
-                          '$_totalSets',
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.asap().fontFamily,
-                            fontSize: 18.0,
-                            color: Colors.white,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            '$_totalSets',
+                            style: TextStyle(
+                              fontFamily: GoogleFonts.asap().fontFamily,
+                              fontSize: 20.0,
+                              color: Colors.white,
+                            ),
                           ),
                         )
                       ],
@@ -519,6 +595,12 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
               child: ListView.builder(
                 itemCount: exercises.length,
                 itemBuilder: (context, index) {
+                  final imagesGifs = exercisesImages;
+
+                  final _exerciseName =
+                      exercises[index]?.replaceAll(RegExp(r'[\/\s]'), '_');
+
+                  final exerciseGif = imagesGifs[_exerciseName];
                   return Card(
                     color: Colors.transparent,
                     child: SingleChildScrollView(
@@ -532,10 +614,10 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                 ClipOval(
                                   child: GestureDetector(
                                     onTap: () {
-                                      _openGif(gifsListExe[index]);
+                                      _openGif(exerciseGif);
                                     },
-                                    child: Image.network(
-                                      gifsListExe[index],
+                                    child: Image(
+                                      image: exerciseGif[0],
                                       width: 48,
                                       height: 48,
                                       fit: BoxFit.cover,
@@ -552,13 +634,18 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 2),
+                                const SizedBox(width: 2),
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       exercises[index],
-                                      style: TextStyle(fontSize: 20),
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.blue,
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily,
+                                          fontWeight: FontWeight.bold),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 2,
                                     ),
@@ -569,7 +656,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                   onTap: () {
                                     _showBottomSheet(context);
                                   },
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.more_vert,
                                     color: Colors.blue,
                                   ),
@@ -586,11 +673,10 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: SizedBox(
-                                  width: SizeConfig.screenWidth,
                                   child: ListTile(
                                     onTap: () => addRow(index),
                                     tileColor: Colors.white30,
-                                    leading: Icon(Icons.add),
+                                    leading: const Icon(Icons.add),
                                     title: Text(
                                       'Add Set',
                                       style: TextStyle(
@@ -611,56 +697,134 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 },
               ),
             ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FilledButton(
-                    onPressed: () async {
-                      List<List<String>>? selectedData = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ApiClass(),
-                        ),
-                      );
-
-                      if (selectedData != null) {
-                        List<String>? selectedExercises = selectedData[0];
-                        List<String>? selectedGifs = selectedData[1];
-
-                        if (selectedExercises != null &&
-                            selectedExercises.isNotEmpty) {
-                          // Do something with the selected exercises
-                          // For example, add them to the workout routines
-                          selectedExercises.forEach(
-                            (exercise) {
-                              addItem(0, exercise);
-                            },
-                          );
-                          if (selectedGifs != null && selectedGifs.isNotEmpty) {
-                            // Do something with the selected exercises
-                            // For example, add them to the workout routines
-                            selectedGifs.forEach(
-                              (gifs) {
-                                addGifs(0, gifs);
-                              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: SizeConfig.screenWidth - 40,
+                        child: CupertinoButton(
+                          color: Colors.blue,
+                          // padding: EdgeInsets.all(9),
+                          onPressed: () async {
+                            List<List<String>>? selectedData =
+                                await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ApiClass(),
+                              ),
                             );
-                          }
-                        }
-                      }
-                    },
-                    child: SizedBox(
-                      width: SizeConfig.screenWidth / 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text("Add Execrsie",
+
+                            if (selectedData != null) {
+                              List<String>? selectedExercises = selectedData[0];
+                              List<String>? selectedGifs = selectedData[1];
+
+                              if (selectedExercises != null &&
+                                  selectedExercises.isNotEmpty) {
+                                // Do something with the selected exercises
+                                // For example, add them to the workout routines
+                                selectedExercises.forEach(
+                                  (exercise) {
+                                    addItem(0, exercise);
+                                  },
+                                );
+                                if (selectedGifs != null &&
+                                    selectedGifs.isNotEmpty) {
+                                  // Do something with the selected exercises
+                                  // For example, add them to the workout routines
+                                  selectedGifs.forEach(
+                                    (gifs) {
+                                      addGifs(0, gifs);
+                                    },
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          child: Text("Add Exercise",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  // color: Colors.blue,
+                                  fontFamily: GoogleFonts.asap().fontFamily,
+                                  fontSize: 18)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CupertinoButton(
+                        child: Text('Settings',
                             textAlign: TextAlign.center,
                             style: TextStyle(
+                                // color: Colors.red,
+                                fontFamily: GoogleFonts.asap().fontFamily,
+                                fontSize: 18)),
+                        onPressed: () {},
+                        color: Colors.white24,
+                        padding: EdgeInsets.all(12),
+                      ),
+                      CupertinoButton(
+                        color: Colors.white24,
+                        padding: EdgeInsets.all(9),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Discard the workout"),
+                              content: const Text(
+                                  "Are you sure you want to discard the workout."),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Continue ')),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HomePage(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text("Discard"),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Text("Discard Workout",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.red,
                                 fontFamily: GoogleFonts.asap().fontFamily,
                                 fontSize: 18)),
                       ),
-                    )),
-              ),
+                    ],
+                  ),
+                )
+              ],
             ),
+            // Center(
+            //     child: ElevatedButton(
+            //         onPressed: () {},
+            //         child: Padding(
+            //             padding: const EdgeInsets.all(12.0),
+            //             child: Text("XXXXXXX",
+            //                 textAlign: TextAlign.center,
+            //                 style: TextStyle(
+            //                     fontFamily: GoogleFonts.asap().fontFamily,
+            //                     fontSize: 18)))))
           ],
         ),
       ),
@@ -671,14 +835,14 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     showModalBottomSheet(
       useSafeArea: true,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
       ),
       builder: (BuildContext context) {
         return ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20.0)),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
                 16.0, 8.0, 16.0, 8.0), // Adjust the padding values as needed
             child: Container(
               // Customize the appearance of the bottom sheet widget
@@ -687,22 +851,22 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    leading: Icon(LineIcons.alternateExchange),
-                    title: Text('Replace'),
+                    leading: const Icon(LineIcons.alternateExchange),
+                    title: const Text('Replace'),
                     onTap: () {
                       Navigator.pop(context, 'Replace');
                     },
                   ),
                   ListTile(
-                    leading: Icon(LineIcons.syncIcon),
-                    title: Text('Reorder'),
+                    leading: const Icon(LineIcons.syncIcon),
+                    title: const Text('Reorder'),
                     onTap: () {
                       Navigator.pop(context, 'Reorder');
                     },
                   ),
                   ListTile(
-                    leading: Icon(LineIcons.trash),
-                    title: Text('Delete'),
+                    leading: const Icon(LineIcons.trash),
+                    title: const Text('Delete'),
                     onTap: () {
                       Navigator.pop(context, 'Delete');
                     },
@@ -720,14 +884,14 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     showModalBottomSheet(
       useSafeArea: true,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
       ),
       builder: (BuildContext context) {
         return ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20.0)),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
                 16.0, 8.0, 16.0, 8.0), // Adjust the padding values as needed
             child: Container(
               // Customize the appearance of the bottom sheet widget
@@ -736,8 +900,11 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    // leading: Icon(LineIcons.alternateExchange),
-                    title: Text(
+                    leading: Icon(
+                      Mdi.alphaWBox,
+                      color: Colors.orange,
+                    ),
+                    title: const Text(
                       'WarmUp',
                       style: TextStyle(color: Colors.orange),
                     ),
@@ -754,8 +921,8 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                     },
                   ),
                   ListTile(
-                    // leading: Icon(LineIcons.syncIcon),
-                    title: Text(
+                    leading: Icon(Mdi.alphaNBox),
+                    title: const Text(
                       'Normal',
                       style: TextStyle(color: Colors.white),
                     ),
@@ -776,25 +943,63 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                     },
                   ),
                   ListTile(
-                    // leading: Icon(LineIcons.trash),
-                    title: Text(
+                    leading: Icon(
+                      Mdi.alphaDBox,
+                      color: Colors.blue,
+                    ),
+                    title: const Text(
                       'Drop',
                       style: TextStyle(color: Colors.blue),
                     ),
                     onTap: () {
                       Navigator.pop(context, 'Drop');
+                      for (int i = index + 1;
+                          i < _exerciseCounters[exerciseIndex].length;
+                          i++) {
+                        if (_exerciseCounters[exerciseIndex][i] >= 2) {
+                          _exerciseCounters[exerciseIndex][i]--;
+                        }
+                      }
                       _exerciseCounters[exerciseIndex][index] = 'D';
+
+                      // _exerciseCounters[exerciseIndex][index] = 'D';
                     },
                   ),
                   ListTile(
-                    // leading: Icon(LineIcons.trash),
-                    title: Text(
+                    leading: Icon(
+                      Mdi.alphaFBox,
+                      color: Colors.red,
+                    ),
+                    title: const Text(
                       'Fail',
                       style: TextStyle(color: Colors.red),
                     ),
                     onTap: () {
                       Navigator.pop(context, 'Fail');
+                      for (int i = index + 1;
+                          i < _exerciseCounters[exerciseIndex].length;
+                          i++) {
+                        if (_exerciseCounters[exerciseIndex][i] >= 2) {
+                          _exerciseCounters[exerciseIndex][i]--;
+                        }
+                      }
                       _exerciseCounters[exerciseIndex][index] = 'F';
+                      // },
+                      //   _exerciseCounters[exerciseIndex][index] = 'F';
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(LineIcons.trash),
+                    title: const Text(
+                      'Remove',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context, 'Remove');
+                      _deleteRow(exerciseIndex, index);
+
+                      // },
+                      //   _exerciseCounters[exerciseIndex][index] = 'F';
                     },
                   ),
                 ],
@@ -866,7 +1071,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       color: Colors.transparent,
       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22.0)),
       child: DataTable(
-        columnSpacing: 30,
+        // columnSpacing: 30,
         // dataRowHeight: 48,
         // decoration: BoxDecoration(
         //   border: Border.all(color: Colors.blue),
@@ -889,16 +1094,16 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
             'Reps',
             style: TextStyle(fontFamily: GoogleFonts.asap().fontFamily),
           )),
-          DataColumn(
+          const DataColumn(
               label: Padding(
             padding: EdgeInsets.all(12.0),
             child: Icon(Icons.done),
           )),
-          DataColumn(
-              label: Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Icon(Icons.delete),
-          )),
+          // const DataColumn(
+          //     label: Padding(
+          //   padding: EdgeInsets.all(12.0),
+          //   child: Icon(Icons.delete),
+          // )),
         ],
         rows: _exerciseRows[exerciseIndex].map((row) {
           final int index = _exerciseRows[exerciseIndex].indexOf(row);
@@ -940,7 +1145,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
               DataCell(
                 TextField(
                   controller: (row.cells[1].child as TextField).controller,
-                  decoration: InputDecoration.collapsed(hintText: '-'),
+                  decoration: const InputDecoration.collapsed(hintText: '-'),
                   keyboardType: TextInputType.number,
                   style: TextStyle(
                       color: Colors.white,
@@ -951,7 +1156,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
               DataCell(
                 TextField(
                   controller: (row.cells[2].child as TextField).controller,
-                  decoration: InputDecoration.collapsed(hintText: '-'),
+                  decoration: const InputDecoration.collapsed(hintText: '-'),
                   keyboardType: TextInputType.number,
                   style: TextStyle(
                       color: Colors.white,
@@ -979,12 +1184,12 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                   });
                 },
               )),
-              DataCell(
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => _deleteRow(exerciseIndex, index),
-                ),
-              ),
+              // DataCell(
+              //   IconButton(
+              //     icon: const Icon(Icons.delete),
+              //     onPressed: () => _deleteRow(exerciseIndex, index),
+              //   ),
+              // ),
             ],
           );
         }).toList(),
@@ -1088,41 +1293,41 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Finish the workout"),
-          content: Text(
+          title: const Text("Finish the workout"),
+          content: const Text(
               "Please complete all exercises before finishing the workout."),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("OK"),
+              child: const Text("OK"),
             ),
           ],
         ),
       );
       return;
     }
-    if (exName == '' && widget.rotName.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Finish the workout"),
-          content: Text("Please Write a name For the Workout"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("OK"),
-            ),
-          ],
-        ),
-      );
-      return;
-    } else {
-      exName = widget.rotName;
-    }
+    // if (exName == '' && widget.rotName.isEmpty) {
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) => AlertDialog(
+    //       title: const Text("Finish the workout"),
+    //       content: const Text("Please Write a name For the Workout"),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () {
+    //             Navigator.pop(context);
+    //           },
+    //           child: const Text("OK"),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   return;
+    // } else {
+    //   exName = widget.rotName;
+    // }
 
     // Create a list of WorkoutData objects
     List<WorkoutData> workoutData = [];
@@ -1168,21 +1373,21 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     bool finishConfirmed = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Finish the workout"),
-        content: Text("Are you sure you want to finish the workout?"),
+        title: const Text("Finish the workout"),
+        content: const Text("Are you sure you want to finish the workout?"),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context, false); // Return false to indicate cancel
             },
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(
                   context, true); // Return true to indicate confirmation
             },
-            child: Text("Finish"),
+            child: const Text("Finish"),
           ),
         ],
       ),

@@ -262,17 +262,21 @@
 //     );
 //   }
 // }
+// import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymbro/constants.dart';
 import 'package:gymbro/data_base/api_page.dart';
+import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/home/bottom_nav.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../workoutpages/prev_workout.dart';
+import 'package:http/http.dart' as http;
 
 class WorkoutPage extends StatefulWidget {
   // final List<String> selectedExeList;
@@ -282,6 +286,7 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
+  List<dynamic> exercises = [];
   int counter = 1;
   String titleRotName = '';
   List<List<dynamic>> gifsList = [
@@ -311,6 +316,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
     super.initState();
     // Load routines from shared preferences when the app is opened
     loadRoutines();
+    Exercise.loadExerciseData();
+    // fetchExercises();
   }
 
   void loadRoutines() async {
@@ -456,6 +463,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
   void addGifs(int routineIndex, String itemName) {
     setState(() {
+      // final exercise = exercises;
+      // final exerciseGif = exercise['gifUrl'] as String;
       gifsList[routineIndex][1]
           .add(itemName); // Add the item to the specific routine
       saveRoutines(); // Save the updated routines
@@ -789,161 +798,160 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: routines.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SingleChildScrollView(
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                10.0), // Set the desired border radius
-                          ),
-                          elevation: 10,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const CircleAvatar(
-                                      backgroundColor: Colors.black,
-                                      child: Icon(
-                                        Icons.fitness_center_outlined,
-                                        color: Colors.white,
-                                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    itemCount: routines.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                        margin: EdgeInsets.all(9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              10.0), // Set the desired border radius
+                        ),
+                        elevation: 10,
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const CircleAvatar(
+                                    backgroundColor: Colors.black,
+                                    child: Icon(
+                                      Icons.fitness_center_outlined,
+                                      color: Colors.white,
                                     ),
-                                    Text(routines[index][0],
-                                        style: TextStyle(
-                                            fontSize: 22,
-                                            fontFamily:
-                                                GoogleFonts.asap().fontFamily)),
-                                    editDeletePop(index, context),
-                                  ],
-                                ),
-                                subtitle: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: ListView.builder(
-                                    physics: const ClampingScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: routines[index][1].length,
-                                    itemBuilder:
-                                        (BuildContext context, int itemIndex) {
-                                      return ListTile(
-                                        title: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: CircleAvatar(
-                                                child: Text(
-                                                  '${itemIndex + 1}',
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                                backgroundColor: Colors.blue,
-                                              ),
-                                            ),
-                                            Flexible(
-                                              child: Text(
-                                                routines[index][1][itemIndex],
-                                                style: TextStyle(
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    fontFamily:
-                                                        GoogleFonts.asap()
-                                                            .fontFamily,
-                                                    fontSize: 18),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
                                   ),
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PrevWorkout(
-                                        routine: routines[index],
-                                        glifsList: gifsList[index][1],
-                                      ),
-                                    ),
-                                  );
-                                },
+                                  Text(routines[index][0],
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily)),
+                                  editDeletePop(index, context),
+                                ],
                               ),
-                              CupertinoButton(
-                                  onPressed: () async {
-                                    List<List<String>>? selectedData =
-                                        await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ApiClass(),
-                                      ),
-                                    );
-
-                                    if (selectedData != null) {
-                                      List<String>? selectedExercises =
-                                          selectedData[0];
-                                      List<String>? selectedGifs =
-                                          selectedData[1];
-
-                                      if (selectedExercises != null &&
-                                          selectedExercises.isNotEmpty) {
-                                        // Do something with the selected exercises
-                                        // For example, add them to the workout routines
-                                        selectedExercises.forEach(
-                                          (exercise) {
-                                            addItem(index, exercise);
-                                          },
-                                        );
-                                        if (selectedGifs != null &&
-                                            selectedGifs.isNotEmpty) {
-                                          // Do something with the selected exercises
-                                          // For example, add them to the workout routines
-                                          selectedGifs.forEach(
-                                            (gifs) {
-                                              addGifs(index, gifs);
-                                            },
-                                          );
-                                        }
-                                      }
-                                    }
-                                  },
-                                  // child: ListTile(
-                                  //   trailing: Icon(
-                                  //     Icons.add,
-                                  //     color: Colors.blue,
-                                  //   ),
-                                  // ),
-                                  child: SizedBox(
-                                    width: SizeConfig.screenWidth / 2,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                              subtitle: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListView.builder(
+                                  physics: const ClampingScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: 1,
+                                  itemBuilder:
+                                      (BuildContext context, int itemIndex) {
+                                    return ListTile(
+                                      title: Row(
                                         children: [
-                                          Text("Add Execrsie",
+                                          // Padding(
+                                          //   padding:
+                                          //       const EdgeInsets.all(8.0),
+                                          //   child: CircleAvatar(
+                                          //     child: Text(
+                                          //       '${itemIndex + 1}',
+                                          //       style: TextStyle(
+                                          //         color: Colors.black,
+                                          //       ),
+                                          //     ),
+                                          //     backgroundColor: Colors.blue,
+                                          //   ),
+                                          // ),
+                                          Flexible(
+                                            child: Text(
+                                              routines[index][1].join(','),
                                               style: TextStyle(
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   fontFamily: GoogleFonts.asap()
                                                       .fontFamily,
-                                                  fontSize: 18)),
+                                                  fontSize: 18),
+                                            ),
+                                          ),
                                         ],
                                       ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PrevWorkout(
+                                      routine: routines[index],
+                                      glifsList: gifsList[index][1],
                                     ),
-                                  )),
-                            ],
-                          ),
+                                  ),
+                                );
+                              },
+                            ),
+                            CupertinoButton(
+                                padding: EdgeInsets.all(1),
+                                onPressed: () async {
+                                  List<List<String>>? selectedData =
+                                      await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ApiClass(),
+                                    ),
+                                  );
+
+                                  if (selectedData != null) {
+                                    List<String>? selectedExercises =
+                                        selectedData[0];
+                                    List<String>? selectedGifs =
+                                        selectedData[1];
+
+                                    if (selectedExercises != null &&
+                                        selectedExercises.isNotEmpty) {
+                                      // Do something with the selected exercises
+                                      // For example, add them to the workout routines
+                                      selectedExercises.forEach(
+                                        (exercise) {
+                                          addItem(index, exercise);
+                                        },
+                                      );
+                                      if (selectedGifs != null &&
+                                          selectedGifs.isNotEmpty) {
+                                        // Do something with the selected exercises
+                                        // For example, add them to the workout routines
+                                        selectedGifs.forEach(
+                                          (gifs) {
+                                            addGifs(index, gifs);
+                                          },
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                                // child: ListTile(
+                                //   trailing: Icon(
+                                //     Icons.add,
+                                //     color: Colors.blue,
+                                //   ),
+                                // ),
+                                child: SizedBox(
+                                  width: SizeConfig.screenWidth / 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text("Add Execrsie",
+                                            style: TextStyle(
+                                                fontFamily: GoogleFonts.asap()
+                                                    .fontFamily,
+                                                fontSize: 18)),
+                                      ],
+                                    ),
+                                  ),
+                                )),
+                          ],
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

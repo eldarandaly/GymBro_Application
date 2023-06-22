@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymbro/constants.dart';
+import 'package:gymbro/home/bottom_nav.dart';
 import 'package:gymbro/home/my_routine_page.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AddMediaPage extends StatefulWidget {
   final List<WorkoutData> workoutData;
-  final String exName;
+  String exName;
   final Stopwatch stopwatch;
   final List<WorkoutSession> workoutSessions;
   final int totalSets;
@@ -46,6 +47,7 @@ class _AddMediaPageState extends State<AddMediaPage> {
   int _totalSets = 0;
   int _totalWeights = 0;
   String _time = '';
+  final fieldText = TextEditingController();
 
   @override
   void initState() {
@@ -117,8 +119,12 @@ class _AddMediaPageState extends State<AddMediaPage> {
     widget.stopwatch.reset();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WorkoutPage()),
+      MaterialPageRoute(builder: (context) => HomePage()),
     );
+  }
+
+  void clearText() {
+    fieldText.clear();
   }
 
   @override
@@ -132,9 +138,50 @@ class _AddMediaPageState extends State<AddMediaPage> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Text(
-                'Good Workout Keep Doing $workoutName',
-                style: headingStyle2,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Good Workout Keep it up',
+                    style: TextStyle(
+                        fontFamily: GoogleFonts.asap().fontFamily,
+                        fontSize: 22)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Enter Workout Name',
+                          style: TextStyle(
+                              fontFamily: GoogleFonts.asap().fontFamily,
+                              fontSize: 22),
+                        ),
+                      ],
+                    ),
+                    TextField(
+                      onChanged: (value) {
+                        setState(() => widget.exName = (value));
+                      },
+                      style: TextStyle(
+                          fontFamily: GoogleFonts.asap().fontFamily,
+                          fontSize: 22),
+                      decoration: InputDecoration(
+                        hintText: 'Workout Name',
+                        hintStyle: TextStyle(
+                            fontFamily: GoogleFonts.asap().fontFamily,
+                            fontSize: 13),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: clearText,
+                        ),
+                      ),
+                      controller: fieldText,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 20),
               Card(
