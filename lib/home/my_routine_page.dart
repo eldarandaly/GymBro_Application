@@ -286,6 +286,8 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
+  Map<String?, dynamic> exercisesImages = Exercise.images;
+
   List<dynamic> exercises = [];
   int counter = 1;
   String titleRotName = '';
@@ -840,12 +842,18 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   itemCount: 1,
                                   itemBuilder:
                                       (BuildContext context, int itemIndex) {
+                                    // final imagesGifs = Exercise.images;
+                                    // final _exerciseName = routines[index][1]
+                                    //         [itemIndex]
+                                    //     ?.replaceAll(RegExp(r'[\/\s]'), '_');
+
+                                    // final exerciseGif =
+                                    //     imagesGifs[_exerciseName];
                                     return ListTile(
                                       title: Row(
                                         children: [
                                           // Padding(
-                                          //   padding:
-                                          //       const EdgeInsets.all(8.0),
+                                          //   padding: const EdgeInsets.all(8.0),
                                           //   child: CircleAvatar(
                                           //     child: Text(
                                           //       '${itemIndex + 1}',

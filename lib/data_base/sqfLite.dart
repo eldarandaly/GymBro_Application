@@ -84,7 +84,7 @@ class DatabaseHelper {
           in session.workoutData.map((workout) => workout.toJson())) {
         await insertWorkoutData(sessionId, data);
       }
-
+      print('----savedIn DB----');
       return true;
     } catch (e) {
       print('Error inserting workout session: $e');

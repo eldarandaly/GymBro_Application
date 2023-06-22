@@ -1,26 +1,28 @@
 import 'dart:convert';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dotted_border/dotted_border.dart';
+// import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gymbro/constants.dart';
+// import 'package:gymbro/constants.dart';
 import 'package:gymbro/data_base/api_page.dart';
 import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/data_base/sqfLite.dart';
 import 'package:gymbro/home/bottom_nav.dart';
-import 'package:gymbro/home/my_routine_page.dart';
+// import 'package:gymbro/home/my_routine_page.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/finish_workout.dart';
-import 'package:intl/intl.dart';
+import 'package:gymbro/workoutpages/reorder_page.dart';
+// import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'dart:async';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mdi/mdi.dart';
 
-import '../feed/feedPage.dart';
+// import '../feed/feedPage.dart';
 
 class WorkoutSession {
   DateTime dateTime;
@@ -440,6 +442,12 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     });
   }
 
+  void _deleteExercise(int index) {
+    setState(() {
+      exercises.removeAt(index); // Remove the exercise from the list
+    });
+  }
+
   void addGifs(int routineIndex, String itemName) {
     setState(() {
       gifsListExe.add(itemName); // Add the item to the specific routine
@@ -494,15 +502,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 ),
               ],
             ),
-            // actions: [
-            //   Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: ElevatedButton(
-            //       onPressed: () => _finishWorkout(context),
-            //       child: const Text('Finish'),
-            //     ),
-            //   ),
-            // ],
           ),
         ),
         body: Column(
@@ -592,7 +591,16 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
+              child: ReorderableListView.builder(
+                onReorder: (int oldIndex, int newIndex) {
+                  setState(() {
+                    if (newIndex > oldIndex) {
+                      newIndex -= 1;
+                    }
+                    final exercise = exercises.removeAt(oldIndex);
+                    exercises.insert(newIndex, exercise);
+                  });
+                },
                 itemCount: exercises.length,
                 itemBuilder: (context, index) {
                   final imagesGifs = exercisesImages;
@@ -602,6 +610,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
                   final exerciseGif = imagesGifs[_exerciseName];
                   return Card(
+                    key: Key('$index'),
                     color: Colors.transparent,
                     child: SingleChildScrollView(
                       child: Column(
@@ -654,7 +663,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                 // Spacer(),
                                 GestureDetector(
                                   onTap: () {
-                                    _showBottomSheet(context);
+                                    _showBottomSheet(context, index);
                                   },
                                   child: const Icon(
                                     Icons.more_vert,
@@ -831,7 +840,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     );
   }
 
-  void _showBottomSheet(BuildContext context) {
+  void _showBottomSheet(BuildContext context, int index) {
     showModalBottomSheet(
       useSafeArea: true,
       context: context,
@@ -861,7 +870,19 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                     leading: const Icon(LineIcons.syncIcon),
                     title: const Text('Reorder'),
                     onTap: () {
-                      Navigator.pop(context, 'Reorder');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ReorderPage(exercises: exercises),
+                        ),
+                      ).then((result) {
+                        if (result != null && result is List<String>) {
+                          setState(() {
+                            exercises = List.from(result);
+                          });
+                        }
+                      });
                     },
                   ),
                   ListTile(
@@ -869,6 +890,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                     title: const Text('Delete'),
                     onTap: () {
                       Navigator.pop(context, 'Delete');
+                      _deleteExercise(index);
                     },
                   ),
                 ],
@@ -877,6 +899,15 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
           ),
         );
       },
+    );
+  }
+
+  void _navigateToReorderPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReorderPage(exercises: exercises),
+      ),
     );
   }
 
@@ -1199,73 +1230,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
   List<WorkoutSession> workoutSessions = [];
 
-  // Future<void> _finishWorkout(BuildContext context) async {
-  //   // Create a list of WorkoutData objects
-  //   List<WorkoutData> workoutData = [];
-  //   int counter = 1;
-
-  //   // Iterate over the exercise rows and create WorkoutData objects
-  //   for (int i = 0; i < _exerciseRows.length; i++) {
-  //     List<Map<String, dynamic>> data = [];
-  //     for (int j = 0; j < _exerciseRows[i].length; j++) {
-  //       DataRow row = _exerciseRows[i][j];
-  //       final int set = int.parse((row.cells[0].child as Text).data!);
-  //       final int weight =
-  //           int.parse((row.cells[1].child as TextField).controller!.text);
-  //       final int reps =
-  //           int.parse((row.cells[2].child as TextField).controller!.text);
-  //       final bool? selected = (row.cells[3].child as Checkbox).value;
-
-  //       data.add({
-  //         'set': set,
-  //         'weight': weight,
-  //         'reps': reps,
-  //         'selected': selected,
-  //       });
-  //     }
-
-  //     final String exercise = exercises[i];
-  //     WorkoutData workout = WorkoutData(
-  //         exercise: exercise, data: data, counter: counter, titlename: exName);
-  //     workoutData.add(workout);
-  //   }
-
-  //   // Get the current date and time
-  //   DateTime now = DateTime.now();
-
-  //   // Create a new WorkoutSession object with the current date, time, and workout data
-  //   WorkoutSession workoutSession = WorkoutSession(
-  //       dateTime: now, workoutData: workoutData, titleRot: exName);
-
-  //   // Add the workout session to the workoutSessions list
-  //   setState(() {
-  //     workoutSessions.add(workoutSession);
-  //   });
-  //   Provider.of<WorkoutDataProvider>(context, listen: false).saveWorkoutData();
-  //   // Access the WorkoutDataProvider and add the workout data
-
-  //   // Provider.of<WorkoutDataProvider>(context, listen: false)
-  //   //     .addWorkoutData(workoutData);
-
-  //   Provider.of<WorkoutDataProvider>(context, listen: false)
-  //       .addWorkoutSession(workoutSession);
-
-  //   // SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  //   // List<String> workoutSessionsJsonList =
-  //   // workoutSessions.map((workoutData) => json.encode(workoutData)).toList();
-
-  //   // await prefs.setStringList('workoutSessions', workoutSessionsJsonList);
-
-  //   // Reset the timer and navigate to the FeedPage
-  //   _stopwatch.reset();
-  //   counter++;
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => WorkoutPage()),
-  //   );
-  // }
-
   Future<void> _finishWorkout(BuildContext context) async {
     // Check if all exercises are completed (checkboxes are active)
     bool allExercisesCompleted = true;
@@ -1308,26 +1272,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       );
       return;
     }
-    // if (exName == '' && widget.rotName.isEmpty) {
-    //   showDialog(
-    //     context: context,
-    //     builder: (context) => AlertDialog(
-    //       title: const Text("Finish the workout"),
-    //       content: const Text("Please Write a name For the Workout"),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () {
-    //             Navigator.pop(context);
-    //           },
-    //           child: const Text("OK"),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    //   return;
-    // } else {
-    //   exName = widget.rotName;
-    // }
 
     // Create a list of WorkoutData objects
     List<WorkoutData> workoutData = [];
@@ -1399,17 +1343,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
         workoutSessions.add(workoutSession);
       });
 
-      // Provider.of<WorkoutDataProvider>(context, listen: false)
-      //     .saveWorkoutData();
-      // Provider.of<WorkoutDataProvider>(context, listen: false)
-      //     .addWorkoutSession(workoutSession);
-
-      // Reset the timer and navigate to the FeedPage
-
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => WorkoutPage()),
-      // );
       Navigator.push(
         context,
         MaterialPageRoute(
