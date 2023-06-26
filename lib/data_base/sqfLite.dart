@@ -99,4 +99,51 @@ class DatabaseHelper {
     int sessionId = results.first.values.first as int;
     return sessionId;
   }
+
+  Future<List<WorkoutSession>> loadWorkoutSessions() async {
+    final db = await database;
+
+    // Fetch all workout sessions from the workout_session table
+    List<Map<String, dynamic>> sessionRows = await db.query('workout_session');
+
+    List<WorkoutSession> workoutSessions = [];
+
+    // Iterate over each session row and fetch the corresponding workout data entries
+    for (Map<String, dynamic> sessionRow in sessionRows) {
+      int sessionId = sessionRow['id'] as int;
+
+      // Fetch workout data entries for the current session from the workout_data table
+      List<Map<String, dynamic>> dataRows = await db.query(
+        'workout_data',
+        where: 'sessionId = ?',
+        whereArgs: [sessionId],
+      );
+
+      List<WorkoutData> workoutData = [];
+
+      // Iterate over each data row and convert it to WorkoutData object
+      for (Map<String, dynamic> dataRow in dataRows) {
+        WorkoutData workout = WorkoutData(
+          exercise: dataRow['exercise'] as String,
+          data: jsonDecode(dataRow['data'] as String),
+          counter: dataRow['counter'] as int,
+          titlename: dataRow['titlename'] as String,
+        );
+
+        workoutData.add(workout);
+      }
+
+      // Create WorkoutSession object and add it to the list
+      WorkoutSession session = WorkoutSession(
+        dateTime: DateTime.parse(sessionRow['dateTime'] as String),
+        workoutData: workoutData,
+        titleRot: sessionRow['titleRot'],
+        imagePath: sessionRow['imagePath'],
+      );
+
+      workoutSessions.add(session);
+    }
+
+    return workoutSessions;
+  }
 }

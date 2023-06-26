@@ -264,17 +264,28 @@
 // }
 // import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/charts/chart_activity_status.dart';
+import 'package:gymbro/charts/chart_sleep.dart';
+import 'package:gymbro/charts/chart_workout_progress.dart';
+import 'package:gymbro/charts/latest_workout.dart';
+import 'package:gymbro/charts/theme/colors.dart';
 import 'package:gymbro/constants.dart';
-import 'package:gymbro/data_base/api_page.dart';
+import 'package:gymbro/data_base/add_exercises.dart';
 import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/home/bottom_nav.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
+import 'package:line_icons/line_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../charts/water_intake_progressbar.dart';
+import '../charts/water_intake_timeline.dart';
 import '../workoutpages/prev_workout.dart';
 import 'package:http/http.dart' as http;
 
@@ -319,6 +330,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
     // Load routines from shared preferences when the app is opened
     loadRoutines();
     Exercise.loadExerciseData();
+    // Provider.of<WorkoutDataProvider>(context, listen: false)
+    //     .loadWorkoutDatabase();
     // fetchExercises();
   }
 
@@ -556,6 +569,71 @@ class _WorkoutPageState extends State<WorkoutPage> {
     );
   }
 
+  void showRenameRoutineDialog(BuildContext _context, int index) {
+    String routineName = '';
+    bool showError = false;
+
+    showDialog(
+      context: _context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Rename Routine',
+            style: TextStyle(fontFamily: GoogleFonts.asap().fontFamily),
+          ),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        routineName = value;
+                        showError = false;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Rename Routine Name',
+                      errorText: showError && routineName.isEmpty
+                          ? 'Enter Routine Name'
+                          : null,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showError = true;
+
+                        if (routineName.isNotEmpty) {
+                          setState(() {
+                            routines[index][0] = routineName;
+                            Navigator.pop(context);
+                          });
+                          // Close the dialog
+                        }
+                      });
+                    },
+                    child: Text('Rename'),
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void showAddItemDialog() {
     String itemName = '';
     bool showError = false;
@@ -636,333 +714,53 @@ class _WorkoutPageState extends State<WorkoutPage> {
             ),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Esay Start',
-                      style: headingStyle,
-                    ),
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: SizeConfig.screenWidth,
-                  child: Card(
-                    // color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          10.0), // Set the desired border radius
-                    ),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StartWorkoutPage(
-                              gifsList: [],
-                              rotName: '',
-                              routineItems: [],
-                              isEmptyWorkout: true,
-                            ),
-                          ),
-                        );
-                      },
-                      // tileColor: Colors.white30,
-                      leading: Icon(
-                        Icons.add,
-                        color: Colors.blue,
-                      ),
-                      title: Center(
-                        child: Text(
-                          'Start Empty Workout',
-                          style: TextStyle(
-                              fontFamily: GoogleFonts.asap().fontFamily,
-                              fontSize: 20,
-                              color: Colors.white),
+        body: DefaultTabController(
+          // animationDuration: Duration(seconds: 0),
+          length: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                TabBar(
+                  unselectedLabelColor: Colors.white,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.blueAccent),
+                  tabs: [
+                    Tab(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            border:
+                                Border.all(color: Colors.blueAccent, width: 1)),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("Home"),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'My Routines',
-                      style: TextStyle(
-                          fontFamily: GoogleFonts.asap().fontFamily,
-                          fontSize: 20,
-                          color: Colors.white),
-                    ),
-                  ),
-                  Spacer(),
-                  Container(
-                      alignment: Alignment.bottomRight,
-                      child: IconButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("About"),
-                                  content: Text(
-                                      "This Application is Developed by \n\n ElDarandaly",
-                                      style: TextStyle(
-                                          fontFamily:
-                                              GoogleFonts.asap().fontFamily)),
-                                  actions: <Widget>[
-                                    ElevatedButton(
-                                      child: const Icon(Icons.favorite),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.info_outline))),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  // crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 160,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                10.0), // Set the desired border radius
-                          ),
-                          child: ListTile(
-                            onTap: showAddRoutineDialog,
-                            // tileColor: Colors.white30,
-                            leading: Icon(
-                              Icons.add,
-                              color: Colors.blue,
-                            ),
-                            title: Text(
-                              'Add New Routine',
-                              style: TextStyle(
-                                  fontFamily: GoogleFonts.asap().fontFamily,
-                                  fontSize: 16,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 160,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                10.0), // Set the desired border radius
-                          ),
-                          child: ListTile(
-                            onTap: () {},
-                            // tileColor: Colors.white30,
-                            leading: Icon(
-                              Icons.search,
-                              color: Colors.blue,
-                            ),
-                            title: Text(
-                              'Explore',
-                              style: TextStyle(
-                                  fontFamily: GoogleFonts.asap().fontFamily,
-                                  fontSize: 18,
-                                  color: Colors.white),
-                            ),
-                          ),
+                    Tab(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            border:
+                                Border.all(color: Colors.blueAccent, width: 1)),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("Stats"),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.builder(
-                    itemCount: routines.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin: EdgeInsets.all(9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              10.0), // Set the desired border radius
-                        ),
-                        elevation: 10,
-                        child: Column(
-                          children: [
-                            ListTile(
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const CircleAvatar(
-                                    backgroundColor: Colors.black,
-                                    child: Icon(
-                                      Icons.fitness_center_outlined,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(routines[index][0],
-                                      style: TextStyle(
-                                          fontSize: 22,
-                                          fontFamily:
-                                              GoogleFonts.asap().fontFamily)),
-                                  editDeletePop(index, context),
-                                ],
-                              ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListView.builder(
-                                  physics: const ClampingScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: 1,
-                                  itemBuilder:
-                                      (BuildContext context, int itemIndex) {
-                                    // final imagesGifs = Exercise.images;
-                                    // final _exerciseName = routines[index][1]
-                                    //         [itemIndex]
-                                    //     ?.replaceAll(RegExp(r'[\/\s]'), '_');
-
-                                    // final exerciseGif =
-                                    //     imagesGifs[_exerciseName];
-                                    return ListTile(
-                                      title: Row(
-                                        children: [
-                                          // Padding(
-                                          //   padding: const EdgeInsets.all(8.0),
-                                          //   child: CircleAvatar(
-                                          //     child: Text(
-                                          //       '${itemIndex + 1}',
-                                          //       style: TextStyle(
-                                          //         color: Colors.black,
-                                          //       ),
-                                          //     ),
-                                          //     backgroundColor: Colors.blue,
-                                          //   ),
-                                          // ),
-                                          Flexible(
-                                            child: Text(
-                                              routines[index][1].join(','),
-                                              style: TextStyle(
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  fontFamily: GoogleFonts.asap()
-                                                      .fontFamily,
-                                                  fontSize: 18),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PrevWorkout(
-                                      routine: routines[index],
-                                      glifsList: gifsList[index][1],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            CupertinoButton(
-                                padding: EdgeInsets.all(1),
-                                onPressed: () async {
-                                  List<List<String>>? selectedData =
-                                      await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ApiClass(),
-                                    ),
-                                  );
-
-                                  if (selectedData != null) {
-                                    List<String>? selectedExercises =
-                                        selectedData[0];
-                                    List<String>? selectedGifs =
-                                        selectedData[1];
-
-                                    if (selectedExercises != null &&
-                                        selectedExercises.isNotEmpty) {
-                                      // Do something with the selected exercises
-                                      // For example, add them to the workout routines
-                                      selectedExercises.forEach(
-                                        (exercise) {
-                                          addItem(index, exercise);
-                                        },
-                                      );
-                                      if (selectedGifs != null &&
-                                          selectedGifs.isNotEmpty) {
-                                        // Do something with the selected exercises
-                                        // For example, add them to the workout routines
-                                        selectedGifs.forEach(
-                                          (gifs) {
-                                            addGifs(index, gifs);
-                                          },
-                                        );
-                                      }
-                                    }
-                                  }
-                                },
-                                // child: ListTile(
-                                //   trailing: Icon(
-                                //     Icons.add,
-                                //     color: Colors.blue,
-                                //   ),
-                                // ),
-                                child: SizedBox(
-                                  width: SizeConfig.screenWidth / 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text("Add Execrsie",
-                                            style: TextStyle(
-                                                fontFamily: GoogleFonts.asap()
-                                                    .fontFamily,
-                                                fontSize: 18)),
-                                      ],
-                                    ),
-                                  ),
-                                )),
-                          ],
-                        ),
-                      );
-                    },
+                Expanded(
+                  child: TabBarView(
+                    children: [homePageLayout(context), getBody(context)],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         // floatingActionButton: FloatingActionButton(
@@ -972,6 +770,327 @@ class _WorkoutPageState extends State<WorkoutPage> {
         //   child: Icon(Icons.add),
         // ),
       ),
+    );
+  }
+
+  Column homePageLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Esay Start',
+                style: headingStyle,
+              ),
+            )
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            width: SizeConfig.screenWidth,
+            child: Card(
+              // color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                    10.0), // Set the desired border radius
+              ),
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StartWorkoutPage(
+                        gifsList: [],
+                        rotName: '',
+                        routineItems: [],
+                        isEmptyWorkout: true,
+                      ),
+                    ),
+                  );
+                },
+                // tileColor: Colors.white30,
+                leading: Icon(
+                  Icons.add,
+                  color: Colors.blue,
+                ),
+                title: Center(
+                  child: Text(
+                    'Start Empty Workout',
+                    style: TextStyle(
+                        fontFamily: GoogleFonts.asap().fontFamily,
+                        fontSize: 20,
+                        color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'My Routines',
+                style: TextStyle(
+                    fontFamily: GoogleFonts.asap().fontFamily,
+                    fontSize: 20,
+                    color: Colors.white),
+              ),
+            ),
+            Spacer(),
+            Container(
+                alignment: Alignment.bottomRight,
+                child: IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("About"),
+                            content: Text(
+                                "This Application is Developed by \n\n ElDarandaly",
+                                style: TextStyle(
+                                    fontFamily: GoogleFonts.asap().fontFamily)),
+                            actions: <Widget>[
+                              ElevatedButton(
+                                child: const Icon(Icons.favorite),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline))),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 160,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          10.0), // Set the desired border radius
+                    ),
+                    child: ListTile(
+                      onTap: showAddRoutineDialog,
+                      // tileColor: Colors.white30,
+                      leading: Icon(
+                        Icons.add,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                        'Add New Routine',
+                        style: TextStyle(
+                            fontFamily: GoogleFonts.asap().fontFamily,
+                            fontSize: 16,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 160,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          10.0), // Set the desired border radius
+                    ),
+                    child: ListTile(
+                      onTap: () {},
+                      // tileColor: Colors.white30,
+                      leading: Icon(
+                        Icons.search,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                        'Explore',
+                        style: TextStyle(
+                            fontFamily: GoogleFonts.asap().fontFamily,
+                            fontSize: 18,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: routines.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  margin: EdgeInsets.all(9),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Set the desired border radius
+                  ),
+                  elevation: 10,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: Colors.black,
+                              child: Icon(
+                                Icons.fitness_center_outlined,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(routines[index][0],
+                                style: TextStyle(
+                                    fontSize: 22,
+                                    fontFamily: GoogleFonts.asap().fontFamily)),
+                            editDeletePop(index, context),
+                          ],
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListView.builder(
+                            physics: const ClampingScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: 1,
+                            itemBuilder: (BuildContext context, int itemIndex) {
+                              // final imagesGifs = Exercise.images;
+                              // final _exerciseName = routines[index][1]
+                              //         [itemIndex]
+                              //     ?.replaceAll(RegExp(r'[\/\s]'), '_');
+
+                              // final exerciseGif =
+                              //     imagesGifs[_exerciseName];
+                              return ListTile(
+                                title: Row(
+                                  children: [
+                                    // Padding(
+                                    //   padding: const EdgeInsets.all(8.0),
+                                    //   child: CircleAvatar(
+                                    //     child: Text(
+                                    //       '${itemIndex + 1}',
+                                    //       style: TextStyle(
+                                    //         color: Colors.black,
+                                    //       ),
+                                    //     ),
+                                    //     backgroundColor: Colors.blue,
+                                    //   ),
+                                    // ),
+                                    Flexible(
+                                      child: Text(
+                                        routines[index][1].join(','),
+                                        style: TextStyle(
+                                            overflow: TextOverflow.ellipsis,
+                                            fontFamily:
+                                                GoogleFonts.asap().fontFamily,
+                                            fontSize: 18),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PrevWorkout(
+                                routine: routines[index],
+                                glifsList: gifsList[index][1],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      CupertinoButton(
+                          padding: EdgeInsets.all(1),
+                          onPressed: () async {
+                            List<List<String>>? selectedData =
+                                await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ApiClass(),
+                              ),
+                            );
+
+                            if (selectedData != null) {
+                              List<String>? selectedExercises = selectedData[0];
+                              List<String>? selectedGifs = selectedData[1];
+
+                              if (selectedExercises != null &&
+                                  selectedExercises.isNotEmpty) {
+                                // Do something with the selected exercises
+                                // For example, add them to the workout routines
+                                selectedExercises.forEach(
+                                  (exercise) {
+                                    addItem(index, exercise);
+                                  },
+                                );
+                                if (selectedGifs != null &&
+                                    selectedGifs.isNotEmpty) {
+                                  // Do something with the selected exercises
+                                  // For example, add them to the workout routines
+                                  selectedGifs.forEach(
+                                    (gifs) {
+                                      addGifs(index, gifs);
+                                    },
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          // child: ListTile(
+                          //   trailing: Icon(
+                          //     Icons.add,
+                          //     color: Colors.blue,
+                          //   ),
+                          // ),
+                          child: SizedBox(
+                            width: SizeConfig.screenWidth / 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Add Execrsie",
+                                      style: TextStyle(
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily,
+                                          fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ], //222
     );
   }
 
@@ -997,6 +1116,13 @@ class _WorkoutPageState extends State<WorkoutPage> {
               style: TextStyle(color: Colors.blue),
             ),
           ),
+          // const PopupMenuItem<String>(
+          //   value: 'Rename',
+          //   child: Text(
+          //     'Rename',
+          //     style: TextStyle(color: Colors.black),
+          //   ),
+          // ),
         ];
       },
       onSelected: (String value) {
@@ -1009,8 +1135,546 @@ class _WorkoutPageState extends State<WorkoutPage> {
             showEditPopup(context, index);
           });
         }
+        // else if (value == 'Rename') {
+        //   setState(() {
+        //     showRenameRoutineDialog(context, index);
+        //   });
+        // }
       },
       color: Colors.white,
     );
   }
+}
+
+Widget getBody(BuildContext context) {
+  var size = MediaQuery.of(context).size;
+  return SingleChildScrollView(
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Welcome",
+                      style: TextStyle(fontSize: 14, color: white),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      "Eldarandaly",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: white),
+                    ),
+                  ],
+                ),
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: black.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Center(
+                    child: Icon(LineIcons.bell),
+                  ),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Container(
+              width: double.infinity,
+              height: 145,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(colors: [secondary, primary]),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Container(
+                        width: (size.width),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "BMI (Body Mass Index)",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: black),
+                            ),
+                            Text(
+                              "You have a normal weight",
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: black),
+                            ),
+                            Container(
+                              width: 95,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                      colors: [fourthColor, thirdColor]),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Center(
+                                child: Text(
+                                  "View More",
+                                  style: TextStyle(fontSize: 13, color: white),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient:
+                            LinearGradient(colors: [fourthColor, thirdColor]),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "20.3",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: white),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Container(
+              width: double.infinity,
+              height: 60,
+              decoration: BoxDecoration(
+                  color: secondary.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Today Target",
+                      style: TextStyle(
+                          fontSize: 17,
+                          color: black,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, "/");
+                      },
+                      child: Container(
+                        width: 70,
+                        height: 35,
+                        decoration: BoxDecoration(
+                            gradient:
+                                LinearGradient(colors: [secondary, primary]),
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Center(
+                          child: Text(
+                            "Check",
+                            style: TextStyle(fontSize: 13, color: white),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Activity Status",
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: white),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Container(
+              width: double.infinity,
+              height: 150,
+              decoration: BoxDecoration(
+                  color: secondary.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(30)),
+              child: Stack(
+                children: [
+                  Container(
+                    // color: white,
+                    width: double.infinity,
+                    child: activityData(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      "Heart Rate",
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              children: [
+                Container(
+                  width: (size.width - 80) / 2,
+                  height: 320,
+                  decoration: BoxDecoration(
+                      color: white,
+                      boxShadow: [
+                        BoxShadow(
+                            color: black.withOpacity(0.01),
+                            spreadRadius: 20,
+                            blurRadius: 10,
+                            offset: Offset(0, 10))
+                      ],
+                      borderRadius: BorderRadius.circular(30)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        WateIntakeProgressBar(),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        Flexible(
+                          child: Column(
+                            children: [
+                              Text(
+                                "Water Intake",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: black),
+                              ),
+                              Spacer(),
+                              Column(
+                                children: [
+                                  Text(
+                                    "Real time updates",
+                                    style:
+                                        TextStyle(fontSize: 13, color: black),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  WaterIntakeTimeLine()
+                                ],
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: (size.width - 80) / 2,
+                        height: 150,
+                        decoration: BoxDecoration(
+                            color: white,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: black.withOpacity(0.01),
+                                  spreadRadius: 20,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 10))
+                            ],
+                            borderRadius: BorderRadius.circular(30)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Sleep",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: black),
+                              ),
+                              Spacer(),
+                              Flexible(
+                                child: LineChart(sleepData()),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                          width: (size.width - 80) / 2,
+                          height: 150,
+                          decoration: BoxDecoration(
+                              color: white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: black.withOpacity(0.01),
+                                    spreadRadius: 20,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 10))
+                              ],
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Calories",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: black)),
+                                Spacer(),
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          colors: [
+                                            fourthColor,
+                                            primary.withOpacity(0.5)
+                                          ]),
+                                      shape: BoxShape.circle),
+                                  child: Center(
+                                      child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle, color: primary),
+                                    child: Center(
+                                      child: Text(
+                                        "1900 Cal",
+                                        style: TextStyle(
+                                            fontSize: 12, color: white),
+                                      ),
+                                    ),
+                                  )),
+                                )
+                              ],
+                            ),
+                          ))
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Workout Progress",
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: white),
+                ),
+                Container(
+                  width: 95,
+                  height: 35,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [secondary, primary]),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Weekly",
+                        style: TextStyle(fontSize: 13, color: white),
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: white,
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Container(
+              width: double.infinity,
+              height: 220,
+              decoration: BoxDecoration(
+                  color: white,
+                  boxShadow: [
+                    BoxShadow(
+                        color: black.withOpacity(0.01),
+                        spreadRadius: 20,
+                        blurRadius: 10,
+                        offset: Offset(0, 10))
+                  ],
+                  borderRadius: BorderRadius.circular(30)),
+              child: workoutProgressData(),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Latest Workout",
+                  style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold, color: white),
+                ),
+                Text(
+                  "See more",
+                  style: TextStyle(fontSize: 15, color: white.withOpacity(0.5)),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Column(
+              children: List.generate(latestWorkoutJson.length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: white,
+                        boxShadow: [
+                          BoxShadow(
+                              color: black.withOpacity(0.01),
+                              spreadRadius: 20,
+                              blurRadius: 10,
+                              offset: Offset(0, 10))
+                        ],
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        latestWorkoutJson[index]['img']))),
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Flexible(
+                            child: Container(
+                              height: 55,
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    latestWorkoutJson[index]['title'],
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: black),
+                                  ),
+                                  Text(
+                                    latestWorkoutJson[index]['description'],
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: black.withOpacity(0.5)),
+                                  ),
+                                  Stack(children: [
+                                    Container(
+                                      width: size.width,
+                                      height: 10,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          color: bgTextField),
+                                    ),
+                                    Container(
+                                      width: size.width *
+                                          (latestWorkoutJson[index]
+                                              ['progressBar']),
+                                      height: 10,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          gradient: LinearGradient(
+                                              colors: [primary, secondary])),
+                                    )
+                                  ])
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: primary)),
+                            child: Center(
+                              child: Icon(Icons.arrow_forward_ios,
+                                  size: 11, color: primary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            )
+          ],
+        ),
+      ),
+    ),
+  );
 }

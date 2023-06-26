@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:gymbro/ai_planer/work_out_plan.dart';
+
 import 'package:gymbro/bmi/calorie_page.dart';
 import 'package:gymbro/profile/profile_page.dart';
-// import 'package:gymbro/workoutpages/start_workout.dart';
-// import 'package:line_icons/line_icon.dart';
+
 import 'package:line_icons/line_icons.dart';
+import 'package:mdi/mdi.dart';
 
 import '../feed/feedPage.dart';
 import 'my_routine_page.dart';
 
 class HomePage extends StatelessWidget {
-  // final MyUser u;
-  // const HomePage({Key? key, required this.u}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,7 +30,7 @@ class BottomBar extends StatefulWidget {
 }
 
 class _BottomBarState extends State<BottomBar> {
-  int _currentIndex = 1;
+  int _currentIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -67,6 +65,14 @@ class _BottomBarState extends State<BottomBar> {
             Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
+                  builder: (BuildContext context) => WorkoutPlanForm(),
+                  settings: settings,
+                );
+              },
+            ),
+            Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute(
                   builder: (BuildContext context) => WorkoutPage(),
                   settings: settings,
                 );
@@ -75,7 +81,7 @@ class _BottomBarState extends State<BottomBar> {
             Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
-                  builder: (BuildContext context) => ProfilePage(),
+                  builder: (BuildContext context) => CaloriePage(),
                   settings: settings,
                 );
               },
@@ -83,7 +89,7 @@ class _BottomBarState extends State<BottomBar> {
             Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
-                  builder: (BuildContext context) => CaloriePage(),
+                  builder: (BuildContext context) => ProfilePage(),
                   settings: settings,
                 );
               },
@@ -103,13 +109,15 @@ class _BottomBarState extends State<BottomBar> {
             // ignore: prefer_const_literals_to_create_immutables
             items: [
               const BottomNavigationBarItem(
-                  icon: Icon(LineIcons.home), label: 'Home'),
+                  icon: Icon(Mdi.home), label: 'Home'),
               const BottomNavigationBarItem(
-                  icon: Icon(LineIcons.dumbbell), label: 'Workout'),
+                  icon: Icon(Mdi.robot), label: 'Planner'),
               const BottomNavigationBarItem(
-                  icon: Icon(LineIcons.userCircle), label: 'Profile'),
+                  icon: Icon(Mdi.dumbbell), label: 'Workout'),
               const BottomNavigationBarItem(
-                  icon: Icon(LineIcons.calculator), label: 'Calories'),
+                  icon: Icon(Mdi.calculator), label: 'Calories'),
+              const BottomNavigationBarItem(
+                  icon: Icon(Mdi.face), label: 'Profile'),
             ],
             selectedItemColor: Colors.blue,
             unselectedItemColor: Colors.white,
@@ -120,65 +128,3 @@ class _BottomBarState extends State<BottomBar> {
     );
   }
 }
-
-
-// Column(
-
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: <Widget>[
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: [
-//               ElevatedButton(
-//                   onPressed: () {
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(builder: (context) => PredictPage()),
-//                     );
-//                   },
-//                   child: const Text('check Heart')),
-//               const SizedBox(width: 20.0),
-//               ElevatedButton(
-//                 child: const Text('Go to Heart Reading Page'),
-//                 onPressed: () {
-//                   Navigator.push(
-//                     context,
-//                     MaterialPageRoute(
-//                         builder: (context) => HeartRateLineChart()),
-//                   );
-//                 },
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 20),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: [
-//               ElevatedButton(
-//                 child: const Text('Enter Heart Data'),
-//                 onPressed: () {
-//                   Navigator.push(
-//                     context,
-//                     MaterialPageRoute(builder: (context) => HeartReadingPage()),
-//                   );
-//                 },
-//               ),
-//               const SizedBox(width: 20.0),
-//               ElevatedButton(
-//                 child: const Text('Profile'),
-//                 onPressed: () {
-//                   globleE = u.email;
-//                   Navigator.push(
-//                     context,
-//                     MaterialPageRoute(
-//                         builder: (context) => ProfilePageClass(
-//                               thisEmail: u.email,
-//                             )),
-//                   );
-//                 },
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-

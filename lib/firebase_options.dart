@@ -67,6 +67,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '987559794584',
     projectId: 'gymbro-81509',
     storageBucket: 'gymbro-81509.appspot.com',
+    androidClientId: '987559794584-jah8kfdpecus8m3anekhct3o3bpod1q6.apps.googleusercontent.com',
     iosClientId: '987559794584-b0rpmheehcfqo8scjbgiks0hhr8t5o3a.apps.googleusercontent.com',
     iosBundleId: 'com.example.gymbro',
   );
@@ -77,6 +78,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '987559794584',
     projectId: 'gymbro-81509',
     storageBucket: 'gymbro-81509.appspot.com',
+    androidClientId: '987559794584-jah8kfdpecus8m3anekhct3o3bpod1q6.apps.googleusercontent.com',
     iosClientId: '987559794584-hg7jephjp04pmj2n120vkp3vplquci3g.apps.googleusercontent.com',
     iosBundleId: 'com.example.gymbro.RunnerTests',
   );

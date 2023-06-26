@@ -8,7 +8,8 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign Up"),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
       ),
       body: Body(),
     );

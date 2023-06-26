@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/constants.dart';
 import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +24,6 @@ class _ApiClassState extends State<ApiClass> {
     "kettlebells",
     "cable",
     "dumbbell",
-    "cable",
     "resistance band",
     "machine",
     "smith machine",
@@ -127,19 +127,46 @@ class _ApiClassState extends State<ApiClass> {
       case "chest":
         return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
       case "quads":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
+        return "https://www.shutterstock.com/image-illustration/quadriceps-male-muscles-anatomy-muscle-600w-489727177.jpg";
       case "serratus anterior":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
-      case "spine":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
+        return "https://www.shutterstock.com/image-illustration/serratus-anterior-anatomy-muscles-isolated-600w-421145383.jpg";
+      // case "spine":
+      //   return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
       case "traps":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
+        return "https://www.shutterstock.com/image-illustration/trapezius-anatomy-muscles-isolated-on-600w-421145371.jpg";
       case "triceps":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
+        return "https://www.shutterstock.com/image-illustration/triceps-anatomy-muscles-isolated-on-600w-421144870.jpg";
       case "upper back":
-        return "https://www.shutterstock.com/image-illustration/chest-pectoralis-major-minor-anatomy-600w-421145401.jpg";
+        return "https://www.shutterstock.com/image-illustration/teres-major-minor-infraspinatus-supraspinatus-600w-421145422.jpg";
       default:
-        return "https://www.shutterstock.com/image-illustration/prostate-anatomy-concept-isolated-on-600w-129983276.jpg"; // Return an empty string or default image URL if target is not found
+        return "https://www.shutterstock.com/image-illustration/blank-anatomy-figure-white-male-600w-129031004.jpg"; // Return an empty string or default image URL if target is not found
+    }
+  }
+
+  String getImageForEquipment(String equipment) {
+    switch (equipment) {
+      case "band":
+        return "https://www.shutterstock.com/image-vector/resistance-band-icon-fitness-health-600w-1712436832.jpg";
+      case "barbell":
+        return "https://www.shutterstock.com/image-vector/barbells-bar-vector-gym-equipment-600w-2295921473.jpg";
+      case "body only":
+        return "https://www.shutterstock.com/image-vector/single-continuous-line-drawing-young-600w-1663866613.jpg";
+      case "cable":
+        return "https://www.shutterstock.com/image-vector/double-handle-tricep-rope-concept-600w-2315514231.jpg";
+      case "dumbbell":
+        return "https://www.shutterstock.com/image-vector/dumbbells-vector-isolated-gym-equipment-600w-2295854785.jpg";
+      case "machine":
+        return "https://www.shutterstock.com/image-illustration/different-fitness-training-equipment-weight-600w-100913788.jpg";
+      case "smith machine":
+        return "https://www.shutterstock.com/image-illustration/incline-smith-machine-bench-press-600w-429857722.jpg";
+      case "e-z curl bar":
+        return "https://www.shutterstock.com/image-vector/barbells-bar-vector-gym-equipment-600w-2295921491.jpg";
+      case "foam roll":
+        return "https://www.shutterstock.com/image-vector/sports-tool-fitness-massage-foam-600w-2155125239.jpg";
+      case "other":
+        return "https://thenounproject.com/api/private/icons/3264341/edit/?backgroundShape=SQUARE&backgroundShapeColor=%23000000&backgroundShapeOpacity=0&exportSize=752&flipX=false&flipY=false&foregroundColor=%23000000&foregroundOpacity=1&imageFormat=png&rotation=0";
+      default:
+        return "https://thenounproject.com/api/private/icons/3264341/edit/?backgroundShape=SQUARE&backgroundShapeColor=%23000000&backgroundShapeOpacity=0&exportSize=752&flipX=false&flipY=false&foregroundColor=%23000000&foregroundOpacity=1&imageFormat=png&rotation=0"; // Return an empty string or default image URL if target is not found
     }
   }
 
@@ -223,35 +250,46 @@ class _ApiClassState extends State<ApiClass> {
       ),
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 666,
-          child: SingleChildScrollView(
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: targets.map((String target) {
-                return Column(
-                  children: [
-                    ListTile(
-                      titleTextStyle: TextStyle(fontSize: 22),
-                      leading: CircleAvatar(
-                        radius: 44,
-                        backgroundColor: Colors.white,
-                        backgroundImage:
-                            NetworkImage(getImageForTarget(target)),
-                      ),
-                      title: Text(target),
-                      onTap: () {
-                        setState(() {
-                          selectedTargets = [target];
-                          selectedTarget = target;
-                        });
-                        Navigator.pop(context); // Close the bottom sheet
-                      },
-                    ),
-                    Divider(),
-                  ],
-                );
-              }).toList(),
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            height: 666,
+            child: SingleChildScrollView(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  Text(
+                    'data',
+                    style: headingStyle,
+                  ),
+                  Column(
+                    children: targets.map((String target) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            titleTextStyle: TextStyle(fontSize: 22),
+                            leading: CircleAvatar(
+                              radius: 44,
+                              backgroundColor: Colors.white,
+                              backgroundImage:
+                                  NetworkImage(getImageForTarget(target)),
+                            ),
+                            title: Text(target),
+                            onTap: () {
+                              setState(() {
+                                selectedTargets = [target];
+                                selectedTarget = target;
+                              });
+                              Navigator.pop(context); // Close the bottom sheet
+                            },
+                          ),
+                          Divider(),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -279,10 +317,10 @@ class _ApiClassState extends State<ApiClass> {
                     ListTile(
                       titleTextStyle: TextStyle(fontSize: 22),
                       leading: CircleAvatar(
-                        child: Icon(Icons.fitness_center),
                         radius: 44,
                         backgroundColor: Colors.white,
-                        // backgroundImage: ,
+                        backgroundImage:
+                            NetworkImage(getImageForEquipment(equipment)),
                       ),
                       // titleTextStyle: TextStyle(fontSize: 33),
                       title: Text(equipment),

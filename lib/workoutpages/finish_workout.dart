@@ -119,8 +119,13 @@ class _AddMediaPageState extends State<AddMediaPage> {
     widget.stopwatch.reset();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => WorkoutPage()),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void clearText() {

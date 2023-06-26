@@ -114,9 +114,14 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/charts/chart_activity_status.dart';
+import 'package:gymbro/charts/chart_workout_progress.dart';
+import 'package:gymbro/charts/theme/colors.dart';
 import 'package:gymbro/size_config.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
 import 'package:intl/intl.dart';
+
+import '../charts/latest_workout.dart';
 
 class PrevWorkout extends StatelessWidget {
   final List<ChartData> data = [
@@ -167,10 +172,7 @@ class PrevWorkout extends StatelessWidget {
           child: ListView(
             children: [
               // chartWidget(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: buildBarChart(),
-              ),
+
               Divider(),
               Row(
                 children: [
@@ -257,7 +259,13 @@ class PrevWorkout extends StatelessWidget {
                   ),
                 ),
               ),
-              // createChart(),
+              SizedBox(
+                height: 40,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: chartDaliy(),
+              ),
             ],
           ),
         ),
@@ -271,17 +279,22 @@ class PrevWorkout extends StatelessWidget {
       width:
           SizeConfig.screenWidth, // Set the desired height of the scroll view
       child: ListView(
-        // scrollDirection: Axis.horizontal,
+        scrollDirection: Axis.horizontal,
         children: <Widget>[
           SizedBox(
             width: SizeConfig.screenWidth,
             child: Center(child: buildBarChart()),
           ),
-          // SizedBox(
-          //   width: SizeConfig
-          //       .screenWidth, // Set the desired width of the second widget
-          //   child: Center(child: chartWidget()),
-          // ),
+          SizedBox(
+            width: SizeConfig
+                .screenWidth, // Set the desired width of the second widget
+            child: Center(child: workoutProgressData()),
+          ),
+          SizedBox(
+            width: SizeConfig
+                .screenWidth, // Set the desired width of the second widget
+            child: Center(child: activityData()),
+          ),
         ],
       ),
     );
@@ -445,6 +458,74 @@ class PrevWorkout extends StatelessWidget {
         .map((chartData) => chartData.volume)
         .reduce((a, b) => a > b ? a : b)
         .toDouble();
+  }
+}
+
+class chartDaliy extends StatelessWidget {
+  const chartDaliy({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+          color: Colors.white54,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+                spreadRadius: 20,
+                blurRadius: 10,
+                color: black.withOpacity(0.01),
+                offset: Offset(0, 1))
+          ]),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(weekly.length, (index) {
+            return Column(
+              children: [
+                Flexible(
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: SizeConfig.screenHeight,
+                        decoration: BoxDecoration(
+                            color: bgTextField,
+                            borderRadius: BorderRadius.circular(30)),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        child: Container(
+                          width: 20,
+                          height: SizeConfig.screenHeight *
+                              (weekly[index]['count']),
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  colors: weekly[index]['color']),
+                              borderRadius: BorderRadius.circular(30)),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  weekly[index]['day'],
+                  style: TextStyle(fontSize: 13, color: Colors.black),
+                )
+              ],
+            );
+          }),
+        ),
+      ),
+    );
   }
 }
 

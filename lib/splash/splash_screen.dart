@@ -21,6 +21,10 @@ class _SplashScreenState extends State<SplashScreen> {
     SizeConfig().init(context);
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+        ),
         body: Body(),
       ),
     );

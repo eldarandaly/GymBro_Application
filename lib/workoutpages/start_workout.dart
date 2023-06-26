@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:gymbro/constants.dart';
-import 'package:gymbro/data_base/api_page.dart';
+import 'package:gymbro/data_base/add_exercises.dart';
 import 'package:gymbro/data_base/local_api.dart';
 import 'package:gymbro/data_base/sqfLite.dart';
 import 'package:gymbro/home/bottom_nav.dart';
@@ -101,6 +101,7 @@ class WorkoutDataProvider extends ChangeNotifier {
   List<WorkoutData> _workoutData = [];
   int workoutCounter = 0;
   List<WorkoutSession> workoutSessions = [];
+  List<WorkoutSession> workoutSessionsDB = [];
   late List<DateTime?> _dates = [];
 
   List<WorkoutData> get workoutData => _workoutData;
@@ -122,6 +123,13 @@ class WorkoutDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void loadWorkoutDatabase() async {
+    workoutSessionsDB = await DatabaseHelper()
+        .loadWorkoutSessions(); // Load workout sessions from the database
+
+    notifyListeners(); // Notify listeners of the data change
+  }
+
   void incrementWorkoutCounter() {
     workoutCounter++;
     notifyListeners();
@@ -129,7 +137,7 @@ class WorkoutDataProvider extends ChangeNotifier {
 
   Future<void> addWorkoutSession(WorkoutSession workoutSession) async {
     workoutSessions.add(workoutSession);
-    notifyListeners();
+    // notifyListeners();
     bool sessionInserted =
         await _databaseHelper.insertWorkoutSession(workoutSession);
     bool dataInserted = true;
@@ -150,7 +158,7 @@ class WorkoutDataProvider extends ChangeNotifier {
     }
 
     if (sessionInserted && dataInserted) {
-      workoutSessions.add(workoutSession);
+      // workoutSessions.add(workoutSession);
       notifyListeners();
       print('Data inserted successfully');
     } else {
@@ -444,7 +452,9 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
   void _deleteExercise(int index) {
     setState(() {
-      exercises.removeAt(index); // Remove the exercise from the list
+      exercises.removeAt(index);
+      _exerciseCounters.removeAt(index);
+      _exerciseRows.removeAt(index); // Remove the exercise from the list
     });
   }
 
@@ -590,25 +600,179 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 ],
               ),
             ),
+            if (exercises.isEmpty)
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Mdi.dumbbell,
+                        size: 30,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Get started',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Add an exercise to start your workout',
+                        style: TextStyle(color: Colors.white60),
+                      ),
+                    ),
+                    Column(
+                      // crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: SizeConfig.screenWidth - 40,
+                                child: CupertinoButton(
+                                  color: Colors.blue,
+                                  // padding: EdgeInsets.all(9),
+                                  onPressed: () async {
+                                    List<List<String>>? selectedData =
+                                        await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ApiClass(),
+                                      ),
+                                    );
+
+                                    if (selectedData != null) {
+                                      List<String>? selectedExercises =
+                                          selectedData[0];
+                                      List<String>? selectedGifs =
+                                          selectedData[1];
+
+                                      if (selectedExercises != null &&
+                                          selectedExercises.isNotEmpty) {
+                                        // Do something with the selected exercises
+                                        // For example, add them to the workout routines
+                                        selectedExercises.forEach(
+                                          (exercise) {
+                                            addItem(0, exercise);
+                                          },
+                                        );
+                                        if (selectedGifs != null &&
+                                            selectedGifs.isNotEmpty) {
+                                          // Do something with the selected exercises
+                                          // For example, add them to the workout routines
+                                          selectedGifs.forEach(
+                                            (gifs) {
+                                              addGifs(0, gifs);
+                                            },
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: Text("Add Exercise",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          // color: Colors.blue,
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily,
+                                          fontSize: 18)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              CupertinoButton(
+                                child: Text('Settings',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        // color: Colors.red,
+                                        fontFamily:
+                                            GoogleFonts.asap().fontFamily,
+                                        fontSize: 18)),
+                                onPressed: () {},
+                                color: Colors.white24,
+                                padding: EdgeInsets.all(12),
+                              ),
+                              CupertinoButton(
+                                color: Colors.white24,
+                                padding: EdgeInsets.all(9),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text("Discard the workout"),
+                                      content: const Text(
+                                          "Are you sure you want to discard the workout."),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Continue ')),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    HomePage(),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text("Discard"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: Text("Discard Workout",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.red,
+                                        fontFamily:
+                                            GoogleFonts.asap().fontFamily,
+                                        fontSize: 18)),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
-              child: ReorderableListView.builder(
-                onReorder: (int oldIndex, int newIndex) {
-                  setState(() {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
-                    }
-                    final exercise = exercises.removeAt(oldIndex);
-                    exercises.insert(newIndex, exercise);
-                  });
-                },
+              child: ListView.builder(
+                // onReorder: (int oldIndex, int newIndex) {
+                //   setState(() {
+                //     if (newIndex > oldIndex) {
+                //       newIndex -= 1;
+                //     }
+                //     final exercise = exercises.removeAt(oldIndex);
+                //     exercises.insert(newIndex, exercise);
+                //   });
+                // },
                 itemCount: exercises.length,
                 itemBuilder: (context, index) {
                   final imagesGifs = exercisesImages;
-
                   final _exerciseName =
                       exercises[index]?.replaceAll(RegExp(r'[\/\s]'), '_');
-
                   final exerciseGif = imagesGifs[_exerciseName];
+
                   return Card(
                     key: Key('$index'),
                     color: Colors.transparent,
@@ -699,6 +863,136 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                               ),
                             ),
                           ),
+                          if (index == exercises.length - 1)
+                            Column(
+                              // crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: SizeConfig.screenWidth - 40,
+                                        child: CupertinoButton(
+                                          color: Colors.blue,
+                                          // padding: EdgeInsets.all(9),
+                                          onPressed: () async {
+                                            List<List<String>>? selectedData =
+                                                await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ApiClass(),
+                                              ),
+                                            );
+
+                                            if (selectedData != null) {
+                                              List<String>? selectedExercises =
+                                                  selectedData[0];
+                                              List<String>? selectedGifs =
+                                                  selectedData[1];
+
+                                              if (selectedExercises != null &&
+                                                  selectedExercises
+                                                      .isNotEmpty) {
+                                                // Do something with the selected exercises
+                                                // For example, add them to the workout routines
+                                                selectedExercises.forEach(
+                                                  (exercise) {
+                                                    addItem(0, exercise);
+                                                  },
+                                                );
+                                                if (selectedGifs != null &&
+                                                    selectedGifs.isNotEmpty) {
+                                                  // Do something with the selected exercises
+                                                  // For example, add them to the workout routines
+                                                  selectedGifs.forEach(
+                                                    (gifs) {
+                                                      addGifs(0, gifs);
+                                                    },
+                                                  );
+                                                }
+                                              }
+                                            }
+                                          },
+                                          child: Text("Add Exercise",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  // color: Colors.blue,
+                                                  fontFamily: GoogleFonts.asap()
+                                                      .fontFamily,
+                                                  fontSize: 18)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      CupertinoButton(
+                                        child: Text('Settings',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                // color: Colors.red,
+                                                fontFamily: GoogleFonts.asap()
+                                                    .fontFamily,
+                                                fontSize: 18)),
+                                        onPressed: () {},
+                                        color: Colors.white24,
+                                        padding: EdgeInsets.all(12),
+                                      ),
+                                      CupertinoButton(
+                                        color: Colors.white24,
+                                        padding: EdgeInsets.all(9),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text(
+                                                  "Discard the workout"),
+                                              content: const Text(
+                                                  "Are you sure you want to discard the workout."),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text(
+                                                        'Continue ')),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            HomePage(),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: const Text("Discard"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        child: Text("Discard Workout",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.red,
+                                                fontFamily: GoogleFonts.asap()
+                                                    .fontFamily,
+                                                fontSize: 18)),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                         ],
                       ),
                     ),
@@ -706,124 +1000,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                 },
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: SizeConfig.screenWidth - 40,
-                        child: CupertinoButton(
-                          color: Colors.blue,
-                          // padding: EdgeInsets.all(9),
-                          onPressed: () async {
-                            List<List<String>>? selectedData =
-                                await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ApiClass(),
-                              ),
-                            );
 
-                            if (selectedData != null) {
-                              List<String>? selectedExercises = selectedData[0];
-                              List<String>? selectedGifs = selectedData[1];
-
-                              if (selectedExercises != null &&
-                                  selectedExercises.isNotEmpty) {
-                                // Do something with the selected exercises
-                                // For example, add them to the workout routines
-                                selectedExercises.forEach(
-                                  (exercise) {
-                                    addItem(0, exercise);
-                                  },
-                                );
-                                if (selectedGifs != null &&
-                                    selectedGifs.isNotEmpty) {
-                                  // Do something with the selected exercises
-                                  // For example, add them to the workout routines
-                                  selectedGifs.forEach(
-                                    (gifs) {
-                                      addGifs(0, gifs);
-                                    },
-                                  );
-                                }
-                              }
-                            }
-                          },
-                          child: Text("Add Exercise",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  // color: Colors.blue,
-                                  fontFamily: GoogleFonts.asap().fontFamily,
-                                  fontSize: 18)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CupertinoButton(
-                        child: Text('Settings',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                // color: Colors.red,
-                                fontFamily: GoogleFonts.asap().fontFamily,
-                                fontSize: 18)),
-                        onPressed: () {},
-                        color: Colors.white24,
-                        padding: EdgeInsets.all(12),
-                      ),
-                      CupertinoButton(
-                        color: Colors.white24,
-                        padding: EdgeInsets.all(9),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Discard the workout"),
-                              content: const Text(
-                                  "Are you sure you want to discard the workout."),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Continue ')),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HomePage(),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text("Discard"),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text("Discard Workout",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontFamily: GoogleFonts.asap().fontFamily,
-                                fontSize: 18)),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
             // Center(
             //     child: ElevatedButton(
             //         onPressed: () {},
@@ -838,6 +1015,492 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
         ),
       ),
     );
+  }
+
+  List<Widget> showButtons(BuildContext context) {
+    return [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.timer,
+                    color: Colors.white,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      ' $_elapsedTime',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.asap().fontFamily,
+                        fontSize: 20.0,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  // Spacer(),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Volume',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.asap().fontFamily,
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '$_totalWeight kg',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.asap().fontFamily,
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Total Sets',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.asap().fontFamily,
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '$_totalSets',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.asap().fontFamily,
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      if (exercises.isEmpty)
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(
+                  Mdi.dumbbell,
+                  size: 30,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Get started',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Add an exercise to start your workout',
+                  style: TextStyle(color: Colors.white60),
+                ),
+              ),
+              Column(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: SizeConfig.screenWidth - 40,
+                          child: CupertinoButton(
+                            color: Colors.blue,
+                            // padding: EdgeInsets.all(9),
+                            onPressed: () async {
+                              List<List<String>>? selectedData =
+                                  await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ApiClass(),
+                                ),
+                              );
+
+                              if (selectedData != null) {
+                                List<String>? selectedExercises =
+                                    selectedData[0];
+                                List<String>? selectedGifs = selectedData[1];
+
+                                if (selectedExercises != null &&
+                                    selectedExercises.isNotEmpty) {
+                                  // Do something with the selected exercises
+                                  // For example, add them to the workout routines
+                                  selectedExercises.forEach(
+                                    (exercise) {
+                                      addItem(0, exercise);
+                                    },
+                                  );
+                                  if (selectedGifs != null &&
+                                      selectedGifs.isNotEmpty) {
+                                    // Do something with the selected exercises
+                                    // For example, add them to the workout routines
+                                    selectedGifs.forEach(
+                                      (gifs) {
+                                        addGifs(0, gifs);
+                                      },
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                            child: Text("Add Exercise",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    // color: Colors.blue,
+                                    fontFamily: GoogleFonts.asap().fontFamily,
+                                    fontSize: 18)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        CupertinoButton(
+                          child: Text('Settings',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  // color: Colors.red,
+                                  fontFamily: GoogleFonts.asap().fontFamily,
+                                  fontSize: 18)),
+                          onPressed: () {},
+                          color: Colors.white24,
+                          padding: EdgeInsets.all(12),
+                        ),
+                        CupertinoButton(
+                          color: Colors.white24,
+                          padding: EdgeInsets.all(9),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Discard the workout"),
+                                content: const Text(
+                                    "Are you sure you want to discard the workout."),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Continue ')),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => HomePage(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text("Discard"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: Text("Discard Workout",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontFamily: GoogleFonts.asap().fontFamily,
+                                  fontSize: 18)),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+      Expanded(
+        child: ListView.builder(
+          // onReorder: (int oldIndex, int newIndex) {
+          //   setState(() {
+          //     if (newIndex > oldIndex) {
+          //       newIndex -= 1;
+          //     }
+          //     final exercise = exercises.removeAt(oldIndex);
+          //     exercises.insert(newIndex, exercise);
+          //   });
+          // },
+          itemCount: exercises.length,
+          itemBuilder: (context, index) {
+            final imagesGifs = exercisesImages;
+            final _exerciseName =
+                exercises[index]?.replaceAll(RegExp(r'[\/\s]'), '_');
+            final exerciseGif = imagesGifs[_exerciseName];
+
+            return Card(
+              key: Key('$index'),
+              color: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Column(
+                  // crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          ClipOval(
+                            child: GestureDetector(
+                              onTap: () {
+                                _openGif(exerciseGif);
+                              },
+                              child: Image(
+                                image: exerciseGif[0],
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.cover,
+                                errorBuilder: (BuildContext context,
+                                    Object exception, StackTrace? stackTrace) {
+                                  return Image.asset(
+                                    'assets/appIcon/android/play_store_512.png', // Path to your placeholder image
+                                    width: 48,
+                                    height: 48,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                exercises[index],
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.blue,
+                                    fontFamily: GoogleFonts.asap().fontFamily,
+                                    fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ),
+                          ),
+                          // Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              _showBottomSheet(context, index);
+                            },
+                            child: const Icon(
+                              Icons.more_vert,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Divider(),
+                    tableView(index),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: SizeConfig.screenWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            child: ListTile(
+                              onTap: () => addRow(index),
+                              tileColor: Colors.white30,
+                              leading: const Icon(Icons.add),
+                              title: Text(
+                                'Add Set',
+                                style: TextStyle(
+                                    fontFamily: GoogleFonts.asap().fontFamily,
+                                    fontSize: 16,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (index == exercises.length)
+                      Column(
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: SizeConfig.screenWidth - 40,
+                                  child: CupertinoButton(
+                                    color: Colors.blue,
+                                    // padding: EdgeInsets.all(9),
+                                    onPressed: () async {
+                                      List<List<String>>? selectedData =
+                                          await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ApiClass(),
+                                        ),
+                                      );
+
+                                      if (selectedData != null) {
+                                        List<String>? selectedExercises =
+                                            selectedData[0];
+                                        List<String>? selectedGifs =
+                                            selectedData[1];
+
+                                        if (selectedExercises != null &&
+                                            selectedExercises.isNotEmpty) {
+                                          // Do something with the selected exercises
+                                          // For example, add them to the workout routines
+                                          selectedExercises.forEach(
+                                            (exercise) {
+                                              addItem(0, exercise);
+                                            },
+                                          );
+                                          if (selectedGifs != null &&
+                                              selectedGifs.isNotEmpty) {
+                                            // Do something with the selected exercises
+                                            // For example, add them to the workout routines
+                                            selectedGifs.forEach(
+                                              (gifs) {
+                                                addGifs(0, gifs);
+                                              },
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    child: Text("Add Exercise",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            // color: Colors.blue,
+                                            fontFamily:
+                                                GoogleFonts.asap().fontFamily,
+                                            fontSize: 18)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                CupertinoButton(
+                                  child: Text('Settings',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          // color: Colors.red,
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily,
+                                          fontSize: 18)),
+                                  onPressed: () {},
+                                  color: Colors.white24,
+                                  padding: EdgeInsets.all(12),
+                                ),
+                                CupertinoButton(
+                                  color: Colors.white24,
+                                  padding: EdgeInsets.all(9),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title:
+                                            const Text("Discard the workout"),
+                                        content: const Text(
+                                            "Are you sure you want to discard the workout."),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Continue ')),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      HomePage(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text("Discard"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  child: Text("Discard Workout",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontFamily:
+                                              GoogleFonts.asap().fontFamily,
+                                          fontSize: 18)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+
+      // Center(
+      //     child: ElevatedButton(
+      //         onPressed: () {},
+      //         child: Padding(
+      //             padding: const EdgeInsets.all(12.0),
+      //             child: Text("XXXXXXX",
+      //                 textAlign: TextAlign.center,
+      //                 style: TextStyle(
+      //                     fontFamily: GoogleFonts.asap().fontFamily,
+      //                     fontSize: 18)))))
+    ];
   }
 
   void _showBottomSheet(BuildContext context, int index) {
@@ -1307,11 +1970,11 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     DateTime now = DateTime.now();
 
     // Create a new WorkoutSession object with the current date, time, and workout data
-    WorkoutSession workoutSession = WorkoutSession(
-        dateTime: now,
-        workoutData: workoutData,
-        titleRot: exName,
-        imagePath: '');
+    // WorkoutSession workoutSession = WorkoutSession(
+    //     dateTime: now,
+    //     workoutData: workoutData,
+    //     titleRot: exName,
+    //     imagePath: '');
 
     // Show a confirmation dialog before finishing the workout
     bool finishConfirmed = await showDialog(
@@ -1339,9 +2002,9 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
 
     if (finishConfirmed == true) {
       // Add the workout session to the workoutSessions list
-      setState(() {
-        workoutSessions.add(workoutSession);
-      });
+      // setState(() {
+      // workoutSessions.add(workoutSession);
+      // });
 
       Navigator.push(
         context,

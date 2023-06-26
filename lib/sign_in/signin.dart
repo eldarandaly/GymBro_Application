@@ -15,7 +15,6 @@ import '../data_base/authentication.dart';
 import '../regestier/register.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'savelogin.dart';
 
@@ -112,14 +111,11 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        // appBar: AppBar(
-        //   title: const Text("TeleHealthCare",
-        //       style: TextStyle(
-        //           color: Colors.blueAccent, fontWeight: FontWeight.w800)),
-        //   backgroundColor: Colors.white,
-        //   centerTitle: true,
-        // ),
-        body: ListView(children: [
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+        ),
+        body: Column(children: [
           // SizedBox(
           //   height: 44,
           // ),
@@ -165,97 +161,128 @@ class _SignInState extends State<SignIn> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(height: 15),
                 Center(
                   child: SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      validator: (val) =>
-                          val!.isEmpty ? "Enter an email" : null,
-                      onChanged: (val) {
-                        setState(() => email = (val));
-                        WhatUser.email = val;
-                        MyUser(
-                            email: email,
-                            username: "username",
-                            password: password,
-                            dateofbirth: 'dateofbirth',
-                            bloodpressaure: 'bloodpressaure',
-                            bloodsugar: 'bloodsugar',
-                            cholestrollevel: 'cholestrollevel',
-                            confirmpassword: 'confirmpassword',
-                            phonenumber: 'phonenumber',
-                            error: error,
-                            gender: 'gender',
-                            isAdoctor: false);
-                      },
-                      decoration: const InputDecoration(
-                          labelText: 'Email',
-                          icon: Icon(Icons.email),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          )),
+                    width: SizeConfig.screenWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.all(19.0),
+                      child: TextFormField(
+                        validator: (val) =>
+                            val!.isEmpty ? "Enter an email" : null,
+                        onChanged: (val) {
+                          setState(() => email = (val));
+                          WhatUser.email = val;
+                          MyUser(
+                              email: email,
+                              username: "username",
+                              password: password,
+                              dateofbirth: 'dateofbirth',
+                              bloodpressaure: 'bloodpressaure',
+                              bloodsugar: 'bloodsugar',
+                              cholestrollevel: 'cholestrollevel',
+                              confirmpassword: 'confirmpassword',
+                              phonenumber: 'phonenumber',
+                              error: error,
+                              gender: 'gender',
+                              isAdoctor: false);
+                        },
+                        decoration: const InputDecoration(
+                            labelText: 'Email',
+                            icon: Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            )),
+                      ),
                     ),
                   ),
                 ),
-                Container(height: 30),
                 Center(
                   child: SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      obscureText: !_passwordVisible,
-                      validator: (val) =>
-                          val!.isEmpty ? "Enter an password" : null,
-                      onChanged: (val) {
-                        setState(() => password = val);
-                      },
-                      decoration: InputDecoration(
-                          labelText: 'Password',
-                          icon: Icon(Icons.password),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _passwordVisible = !_passwordVisible;
-                              });
-                            },
-                            icon: Icon(
-                              // Based on passwordVisible state choose the icon
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Theme.of(context).hintColor,
+                    width: SizeConfig.screenWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.all(19.0),
+                      child: TextFormField(
+                        obscureText: !_passwordVisible,
+                        validator: (val) =>
+                            val!.isEmpty ? "Enter an password" : null,
+                        onChanged: (val) {
+                          setState(() => password = val);
+                        },
+                        decoration: InputDecoration(
+                            labelText: 'Password',
+                            icon: Icon(Icons.password),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                              icon: Icon(
+                                // Based on passwordVisible state choose the icon
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Theme.of(context).hintColor,
+                              ),
                             ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          )),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            )),
+                      ),
                     ),
                   ),
                 ),
-                Container(height: 50),
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          // _mod.addUserModelData();
-                          // // _mod.addUserHRlData();
-                          if (_formkey.currentState!.validate()) {
-                            dynamic result = await _auth
-                                .signinwithemailandpassword(email, password);
-                            // print('------$result');
-                            if (result == null) {
-                              setState(() {
-                                error = "please enter valid information";
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            // _mod.addUserModelData();
+                            // // _mod.addUserHRlData();
+                            if (_formkey.currentState!.validate()) {
+                              dynamic result = await _auth
+                                  .signinwithemailandpassword(email, password);
+                              // print('------$result');
+                              if (result == null) {
+                                setState(() {
+                                  error = "please enter valid information";
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Error"),
+                                        content: Text(
+                                            'Check Your Email or Password'),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            child: const Text("OK"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                });
+                              } else {
+                                // await _saveLogin();
+                                loginData.email = email;
+                                loginData.password = password;
+                                await LoginPersistence.saveLogin(loginData);
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: const Text("Error"),
+                                      title: const Text("Pop UP"),
                                       content:
-                                          Text('Check Your Email or Password'),
+                                          Text('Welecome ${WhatUser.email}'),
                                       actions: <Widget>[
                                         ElevatedButton(
                                           child: const Text("OK"),
@@ -267,55 +294,30 @@ class _SignInState extends State<SignIn> {
                                     );
                                   },
                                 );
-                              });
-                            } else {
-                              // await _saveLogin();
-                              loginData.email = email;
-                              loginData.password = password;
-                              await LoginPersistence.saveLogin(loginData);
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Pop UP"),
-                                    content: Text('Welecome ${WhatUser.email}'),
-                                    actions: <Widget>[
-                                      ElevatedButton(
-                                        child: const Text("OK"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => HomePage(),
-                                ),
-                              );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HomePage(),
+                                  ),
+                                );
+                              }
                             }
-                          }
-                        },
-                        icon: Icon(Icons.login),
-                        label: Text(
-                          'Signin',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: GoogleFonts.asap().fontFamily,
-                              fontSize: 22),
+                          },
+                          icon: Icon(Icons.login),
+                          label: Text(
+                            'Sign in',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: GoogleFonts.asap().fontFamily,
+                                fontSize: 22),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              fixedSize: const Size.fromWidth(200.0),
+                              maximumSize: const Size.fromHeight(50.0),
+                              backgroundColor: Colors.blueAccent),
                         ),
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            fixedSize: const Size.fromWidth(200.0),
-                            maximumSize: const Size.fromHeight(50.0),
-                            backgroundColor: Colors.grey),
-                      ),
-                      SizedBox(
-                        height: 22,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),

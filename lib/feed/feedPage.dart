@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/MuscleGroupSelector/muscle_group_selector.dart';
+import 'package:gymbro/size_config.dart';
 import 'package:gymbro/splash/components/default_button.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
@@ -383,48 +385,6 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
-  // void showPopupMenu(BuildContext context) {
-  //   final RenderBox? button = context.findRenderObject() as RenderBox?;
-  //   final RenderSliverList? sliverList =
-  //       context.findRenderObject() as RenderSliverList?;
-
-  //   if (sliverList != null && button != null && button is RenderBox) {
-  //     final RenderBox overlay =
-  //         Overlay.of(context)!.context.findRenderObject() as RenderBox;
-
-  //     final RelativeRect position = RelativeRect.fromRect(
-  //       Rect.fromPoints(
-  //         button.localToGlobal(Offset.zero, ancestor: overlay),
-  //         button.localToGlobal(button.size.bottomRight(Offset.zero),
-  //             ancestor: overlay),
-  //       ),
-  //       Offset.zero & overlay.size,
-  //     );
-
-  //     showMenu(
-  //       context: context,
-  //       position: position,
-  //       items: [
-  //         PopupMenuItem(
-  //           child: Text('Option 1'),
-  //           value: 'option1',
-  //         ),
-  //         PopupMenuItem(
-  //           child: Text('Option 2'),
-  //           value: 'option2',
-  //         ),
-  //       ],
-  //       elevation: 8,
-  //     ).then((value) {
-  //       if (value == 'option1') {
-  //         // Handle Option 1
-  //       } else if (value == 'option2') {
-  //         // Handle Option 2
-  //       }
-  //     });
-  //   }
-  // }
-
   void deleteRoutine(int index) {
     setState(() {
       workoutSessions.removeAt(index); // Remove the routine at the given index
@@ -445,10 +405,7 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     workoutSessions = Provider.of<WorkoutDataProvider>(context).workoutSessions;
-    // setState(() {
-    //   loadSavedWorkoutData();
-    //   saveWorkoutData();
-    // });
+
     if (workoutSessions.isEmpty) {
       return SafeArea(
         child: Scaffold(
@@ -482,25 +439,6 @@ class _FeedPageState extends State<FeedPage> {
                   height: 100,
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(22)),
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     // color: Color.fromARGB(255, 170, 67, 255),
-                      //     offset: Offset(0, 20),
-                      //     blurRadius: 30,
-                      //     spreadRadius: -5,
-                      //   ),
-                      // ],
-                      // gradient: LinearGradient(
-                      //   begin: Alignment.topLeft,
-                      //   end: Alignment.bottomCenter,
-                      //   colors: [
-                      //     Color.fromARGB(255, 39, 38, 38),
-                      //     Color.fromARGB(255, 83, 83, 83),
-                      //     Color.fromARGB(255, 149, 148, 150),
-                      //     Color.fromARGB(255, 163, 163, 163),
-                      //   ],
-                      //   stops: const [0.1, 0.3, 0.9, 1.0],
-                      // ),
                       color: Colors.white24),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -520,22 +458,22 @@ class _FeedPageState extends State<FeedPage> {
               SizedBox(
                 height: 50,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StartWorkoutPage(
-                        gifsList: [],
-                        rotName: '',
-                        routineItems: [],
-                        isEmptyWorkout: true,
-                      ),
-                    ),
-                  );
-                },
-                child: Text('Start Workout'),
-              )
+              // ElevatedButton(
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(
+              //         builder: (context) => StartWorkoutPage(
+              //           gifsList: [],
+              //           rotName: '',
+              //           routineItems: [],
+              //           isEmptyWorkout: true,
+              //         ),
+              //       ),
+              //     );
+              //   },
+              //   child: Text('Start Workout'),
+              // )
             ],
           ),
         ),
@@ -549,7 +487,10 @@ class _FeedPageState extends State<FeedPage> {
         body: ListView.builder(
           itemCount: workoutSessions.length,
           itemBuilder: (context, index) {
-            WorkoutSession workoutSession = workoutSessions[index];
+            WorkoutSession workoutSession =
+                workoutSessions.reversed.toList()[index];
+
+            // WorkoutSession workoutSession = workoutSessions[index];
             DateTime dateTime = workoutSession.dateTime;
             String date = DateFormat('yyyy-MM-dd').format(dateTime);
             String time = DateFormat('HH:mm').format(dateTime);
@@ -637,14 +578,23 @@ class _FeedPageState extends State<FeedPage> {
                         ],
                       ),
                       SizedBox(height: 16.0),
-                      if (imagePath != null &&
-                          imagePath
-                              .isNotEmpty) // Check if imagePath is not null or empty
+                      if (imagePath != null && imagePath.isNotEmpty)
                         Image.memory(
                           base64Decode(imagePath),
                           fit: BoxFit.cover,
                           height: 200,
                         ),
+                      // if (imagePath == null || imagePath.isEmpty)
+                      Container(
+                        color: Colors.white,
+                        child: Container(
+                            color: Colors.red,
+                            width: SizeConfig.screenWidth,
+                            height: 300,
+                            child: MuscleGroupSelector(
+                              workoutSession: workoutSession,
+                            )),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

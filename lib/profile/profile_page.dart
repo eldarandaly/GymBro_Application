@@ -135,38 +135,40 @@ class _ProfilePageState extends State<ProfilePage> {
                               as ImageProvider<Object>?,
                       radius: 80,
                     ),
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 40,
-                        ),
-                        Center(
-                          child: Text(
-                            '${loginData.email}',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 40,
+                          ),
+                          Center(
+                            child: Text(
+                              '${loginData.email}',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        const Column(
-                          children: [
-                            SizedBox(height: 33),
-                            Column(
-                              children: [
-                                Text('Workouts'),
-                                SizedBox(
-                                  height: 11,
-                                ),
-                                Text('123',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+                          const Column(
+                            children: [
+                              SizedBox(height: 33),
+                              Column(
+                                children: [
+                                  Text('Workouts'),
+                                  SizedBox(
+                                    height: 11,
+                                  ),
+                                  Text('123',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     SizedBox(width: 16.0),
                     SizedBox(
@@ -210,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
                             child: Text(
-                              'Streaks 2 Weeks ',
+                              'Streaks ${_dates.length} days',
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
@@ -247,16 +249,78 @@ class _ProfilePageState extends State<ProfilePage> {
                         borderRadius: BorderRadius.circular(22)),
                     child: CalendarDatePicker2(
                       config: CalendarDatePicker2Config(
+                        dayBuilder: ({
+                          required date,
+                          textStyle,
+                          decoration,
+                          isSelected,
+                          isDisabled,
+                          isToday,
+                        }) {
+                          Widget? dayWidget;
+                          if (isSelected == true) {
+                            dayWidget = Container(
+                              decoration: decoration,
+                              child: Center(
+                                child: Stack(
+                                  alignment: AlignmentDirectional.center,
+                                  children: [
+                                    Text(
+                                      MaterialLocalizations.of(context)
+                                          .formatDecimal(date.day),
+                                      style: textStyle,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 27.5),
+                                      child: Container(
+                                        height: 4,
+                                        width: 4,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          color: isSelected == true
+                                              ? Colors.white
+                                              : Colors.grey[500],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          return dayWidget;
+                        },
+                        weekdayLabelTextStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        weekdayLabels: [
+                          'Sun',
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat'
+                        ],
+                        firstDayOfWeek: 1,
+                        centerAlignModePicker: true,
+                        customModePickerIcon: SizedBox(),
                         selectedDayTextStyle: TextStyle(
                             fontFamily: GoogleFonts.asap().fontFamily,
-                            color: Colors.white),
+                            color: Colors.white,
+                            // decoration: TextDecoration.underline,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900),
+                        selectedDayHighlightColor: Colors.blue[800],
                         dayTextStyle: TextStyle(
                             fontFamily: GoogleFonts.asap().fontFamily,
                             color: Colors.white),
                         calendarType: CalendarDatePicker2Type.multi,
                       ),
                       value: _dates,
-                      onValueChanged: (dates) => _dates = dates,
+                      // onValueChanged: (dates) => _dates = dates,
                     ),
                   ),
                 )

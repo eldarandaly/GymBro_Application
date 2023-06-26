@@ -17,6 +17,7 @@ class _BodyState extends State<Body> {
   int currentPage = 0;
   late LoginData loginData;
   late bool isUserLoggedIn;
+  late bool isUserLoggedInGoogle;
   late Timer _timer;
 
   @override
@@ -24,6 +25,7 @@ class _BodyState extends State<Body> {
     super.initState();
     loginData = LoginData(email: '', password: '');
     isUserLoggedIn = false;
+    isUserLoggedInGoogle = false;
     checkLoginStatus();
     startTimer();
     checkLoginStatusGoogle();
@@ -45,7 +47,7 @@ class _BodyState extends State<Body> {
   void checkLoginStatusGoogle() async {
     bool isLoggedIn = await LoginPersistence.loadLoginState();
     setState(() {
-      isUserLoggedIn = isLoggedIn;
+      isUserLoggedInGoogle = isLoggedIn;
     });
   }
 
@@ -112,7 +114,10 @@ class _BodyState extends State<Body> {
                 (index) => buildDot(index),
               ),
             ),
-            showButton(currentPage),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: showButton(currentPage),
+            ),
           ],
         ),
       );
@@ -126,7 +131,7 @@ class _BodyState extends State<Body> {
       height: 10,
       width: currentPage == index ? 20 : 10,
       decoration: BoxDecoration(
-        color: currentPage == index ? Colors.blue : Colors.grey,
+        color: currentPage == index ? Colors.blue : Colors.transparent,
         borderRadius: BorderRadius.circular(5),
       ),
     );
@@ -134,7 +139,7 @@ class _BodyState extends State<Body> {
 
   Widget showButton(index) {
     if (index >= 0) {
-      if (isUserLoggedIn) {
+      if (isUserLoggedIn || isUserLoggedInGoogle) {
         return Container(
           height: 70,
           width: 300,
@@ -176,7 +181,7 @@ class SplashContent extends StatelessWidget {
       children: [
         Image.asset(
           image,
-          height: double.infinity,
+          height: 500,
           width: double.infinity,
           fit: BoxFit.cover,
         ),
@@ -193,11 +198,11 @@ class SplashContent extends StatelessWidget {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontFamily: GoogleFonts.bebasNeue().fontFamily,
+                fontFamily: GoogleFonts.openSans().fontFamily,
                 letterSpacing: 1,
                 shadows: [
                   Shadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.blue.withOpacity(0.5),
                     offset: const Offset(2, 2),
                     blurRadius: 3,
                   ),
