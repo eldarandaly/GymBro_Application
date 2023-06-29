@@ -1,15 +1,22 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gymbro/ai_planer/work_out_plan.dart';
+import 'package:gymbro/charts/charts_page.dart';
 import 'package:gymbro/sign_in/savelogin.dart';
 import 'package:gymbro/sign_in/signin.dart';
+import 'package:gymbro/size_config.dart';
+import 'package:mdi/mdi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
+
+import '../bmi/calorie_page.dart';
 
 final today = DateUtils.dateOnly(DateTime.now());
 
@@ -128,12 +135,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundImage: _imageData != null
-                          ? MemoryImage(base64Decode(_imageData!))
-                          : AssetImage('assets/profile.jpg')
-                              as ImageProvider<Object>?,
-                      radius: 80,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundImage: _imageData != null
+                            ? MemoryImage(base64Decode(_imageData!))
+                            : AssetImage('assets/profile.jpg')
+                                as ImageProvider<Object>?,
+                        radius: 70,
+                      ),
                     ),
                     Flexible(
                       child: Column(
@@ -148,9 +158,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Column(
+                          Column(
                             children: [
                               SizedBox(height: 33),
                               Column(
@@ -159,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   SizedBox(
                                     height: 11,
                                   ),
-                                  Text('123',
+                                  Text('${_dates.length}',
                                       style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
@@ -173,17 +184,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     SizedBox(width: 16.0),
                     SizedBox(
                       height: 8.0,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                        onPressed: _uploadImage,
-                        child: Text('Upload Image'),
-                      ),
                     ),
                   ],
                 ),
@@ -203,127 +203,105 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            child: Text(
-                              'Streaks ${_dates.length} days',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Spacer(),
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            child: Text(
-                              'Rest 1 Day',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        // color: Colors.grey,
-                        image: DecorationImage(
-                            // fit: BoxFit.scaleDown,
-                            opacity: 0.2,
-                            image: AssetImage(
-                                'assets/appIcon/android/play_store_512.png')),
-                        // border: Border.all(color: Colors.blue),
-                        borderRadius: BorderRadius.circular(22)),
-                    child: CalendarDatePicker2(
-                      config: CalendarDatePicker2Config(
-                        dayBuilder: ({
-                          required date,
-                          textStyle,
-                          decoration,
-                          isSelected,
-                          isDisabled,
-                          isToday,
-                        }) {
-                          Widget? dayWidget;
-                          if (isSelected == true) {
-                            dayWidget = Container(
-                              decoration: decoration,
-                              child: Center(
-                                child: Stack(
-                                  alignment: AlignmentDirectional.center,
-                                  children: [
-                                    Text(
-                                      MaterialLocalizations.of(context)
-                                          .formatDecimal(date.day),
-                                      style: textStyle,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 27.5),
-                                      child: Container(
-                                        height: 4,
-                                        width: 4,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                          color: isSelected == true
-                                              ? Colors.white
-                                              : Colors.grey[500],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                Column(
+                  children: [
+                    Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                            color: Colors.white30,
+                            width: SizeConfig.screenWidth / 3 + 18,
+                            height: 50,
+                            child: ListTile(
+                              leading: Icon(
+                                Mdi.chartLine,
+                                color: Colors.blueAccent,
                               ),
-                            );
-                          }
-                          return dayWidget;
-                        },
-                        weekdayLabelTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        weekdayLabels: [
-                          'Sun',
-                          'Mon',
-                          'Tue',
-                          'Wed',
-                          'Thu',
-                          'Fri',
-                          'Sat'
-                        ],
-                        firstDayOfWeek: 1,
-                        centerAlignModePicker: true,
-                        customModePickerIcon: SizedBox(),
-                        selectedDayTextStyle: TextStyle(
-                            fontFamily: GoogleFonts.asap().fontFamily,
-                            color: Colors.white,
-                            // decoration: TextDecoration.underline,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900),
-                        selectedDayHighlightColor: Colors.blue[800],
-                        dayTextStyle: TextStyle(
-                            fontFamily: GoogleFonts.asap().fontFamily,
-                            color: Colors.white),
-                        calendarType: CalendarDatePicker2Type.multi,
-                      ),
-                      value: _dates,
-                      // onValueChanged: (dates) => _dates = dates,
+                              title: Text('Statistics'),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChartsPage(),
+                                  ),
+                                );
+                                ;
+                              },
+                            )),
+                        Container(
+                            color: Colors.white30,
+                            width: SizeConfig.screenWidth / 3 + 18,
+                            height: 50,
+                            child: ListTile(
+                              leading: const Icon(Mdi.calendar,
+                                  color: Colors.blueAccent),
+                              title: const Text('Calendar'),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => celanderPage(),
+                                  ),
+                                );
+                              },
+                            )),
+                      ],
                     ),
-                  ),
-                )
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                            color: Colors.white30,
+                            width: SizeConfig.screenWidth / 3 + 25,
+                            height: 50,
+                            child: ListTile(
+                              leading: Icon(
+                                Mdi.calculator,
+                                color: Colors.blueAccent,
+                              ),
+                              title: const Text('BMI Calculator'),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CaloriePage(),
+                                  ),
+                                );
+                                ;
+                              },
+                            )),
+                        Container(
+                          color: Colors.white30,
+                          width: SizeConfig.screenWidth / 3 + 22,
+                          height: 50,
+                          child: ListTile(
+                            leading: const Icon(Mdi.robotExcited,
+                                color: Colors.blueAccent),
+                            title: const Text('AI Bro'),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => WorkoutPlanForm(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(),
+                    Divider(
+                      height: 22,
+                      color: Colors.blue,
+                    ),
+                  ],
+                ),
+                // buildCalendar(context),
               ],
             ),
           ),
@@ -331,6 +309,87 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
+  // Widget buildCalendar(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //           // color: Colors.grey,
+  //           image: DecorationImage(
+  //               // fit: BoxFit.scaleDown,
+  //               opacity: 0.2,
+  //               image: AssetImage('assets/appIcon/android/play_store_512.png')),
+  //           // border: Border.all(color: Colors.blue),
+  //           borderRadius: BorderRadius.circular(22)),
+  //       child: CalendarDatePicker2(
+  //         config: CalendarDatePicker2Config(
+  //           dayBuilder: ({
+  //             required date,
+  //             textStyle,
+  //             decoration,
+  //             isSelected,
+  //             isDisabled,
+  //             isToday,
+  //           }) {
+  //             Widget? dayWidget;
+  //             if (isSelected == true) {
+  //               dayWidget = Container(
+  //                 decoration: decoration,
+  //                 child: Center(
+  //                   child: Stack(
+  //                     alignment: AlignmentDirectional.center,
+  //                     children: [
+  //                       Text(
+  //                         MaterialLocalizations.of(context)
+  //                             .formatDecimal(date.day),
+  //                         style: textStyle,
+  //                       ),
+  //                       Padding(
+  //                         padding: const EdgeInsets.only(top: 27.5),
+  //                         child: Container(
+  //                           height: 4,
+  //                           width: 4,
+  //                           decoration: BoxDecoration(
+  //                             borderRadius: BorderRadius.circular(5),
+  //                             color: isSelected == true
+  //                                 ? Colors.white
+  //                                 : Colors.grey[500],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               );
+  //             }
+  //             return dayWidget;
+  //           },
+  //           weekdayLabelTextStyle: const TextStyle(
+  //             color: Colors.white,
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //           weekdayLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  //           firstDayOfWeek: 1,
+  //           centerAlignModePicker: true,
+  //           customModePickerIcon: SizedBox(),
+  //           selectedDayTextStyle: TextStyle(
+  //               fontFamily: GoogleFonts.asap().fontFamily,
+  //               color: Colors.white,
+  //               // decoration: TextDecoration.underline,
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.w900),
+  //           selectedDayHighlightColor: Colors.blue[800],
+  //           dayTextStyle: TextStyle(
+  //               fontFamily: GoogleFonts.asap().fontFamily, color: Colors.white),
+  //           calendarType: CalendarDatePicker2Type.multi,
+  //         ),
+  //         value: _dates,
+  //         // onValueChanged: (dates) => _dates = dates,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget popUpLogout() {
     return PopupMenuButton<String>(
@@ -340,9 +399,9 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       itemBuilder: (BuildContext context) {
         return <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(
+          const PopupMenuItem<String>(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 'Logout',
                 style: TextStyle(color: Colors.red),
@@ -350,23 +409,27 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             value: 'Logout',
           ),
+          PopupMenuItem<String>(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton(
+                onPressed: _uploadImage,
+                child: Text('Upload Image'),
+              ),
+            ),
+            value: 'Upload',
+          ),
         ];
       },
       onSelected: (String value) {
         if (value == 'Logout') {
           LoginPersistence.logOut();
-          // Navigator.pushReplacement(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => SignIn(),
-          //     ));
           SystemNavigator.pop();
-          // Navigator.pushAndRemoveUntil(context, newRoute, (route) => false)
-        } else if (value == 'option2') {
+        } else if (value == 'Upload') {
           // Handle Option 2
         }
       },
-      color: Colors.black54,
+      color: Colors.black,
     );
   }
 }

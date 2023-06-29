@@ -93,17 +93,18 @@ class _CaloriePageState extends State<CaloriePage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80.0),
         child: AppBar(
+          backgroundColor: Colors.transparent,
           title: Column(
             children: [
               SizedBox(
                 height: 40,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Calorie Calculator',
-                    style:
-                        TextStyle(fontFamily: GoogleFonts.asap().fontFamily)),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Text('Calorie Calculator',
+              //       style:
+              //           TextStyle(fontFamily: GoogleFonts.asap().fontFamily)),
+              // ),
             ],
           ),
         ),
@@ -114,6 +115,12 @@ class _CaloriePageState extends State<CaloriePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Calorie Calculator',
+                  style: TextStyle(
+                      fontFamily: GoogleFonts.asap().fontFamily, fontSize: 20)),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(

@@ -9,7 +9,7 @@ import 'package:line_icons/line_icons.dart';
 import 'package:mdi/mdi.dart';
 
 import '../feed/feedPage.dart';
-import 'my_routine_page.dart';
+import 'home_page.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -30,7 +30,7 @@ class BottomBar extends StatefulWidget {
 }
 
 class _BottomBarState extends State<BottomBar> {
-  int _currentIndex = 2;
+  int _currentIndex = 1;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,8 +49,7 @@ class _BottomBarState extends State<BottomBar> {
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
-
-        // drawer: CustomDrawer(),
+        drawer: Drawer(),
         body: IndexedStack(
           index: _currentIndex,
           children: <Widget>[
@@ -62,14 +61,14 @@ class _BottomBarState extends State<BottomBar> {
                 );
               },
             ),
-            Navigator(
-              onGenerateRoute: (RouteSettings settings) {
-                return MaterialPageRoute(
-                  builder: (BuildContext context) => WorkoutPlanForm(),
-                  settings: settings,
-                );
-              },
-            ),
+            // Navigator(
+            //   onGenerateRoute: (RouteSettings settings) {
+            //     return MaterialPageRoute(
+            //       builder: (BuildContext context) => WorkoutPlanForm(),
+            //       settings: settings,
+            //     );
+            //   },
+            // ),
             Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
@@ -78,14 +77,14 @@ class _BottomBarState extends State<BottomBar> {
                 );
               },
             ),
-            Navigator(
-              onGenerateRoute: (RouteSettings settings) {
-                return MaterialPageRoute(
-                  builder: (BuildContext context) => CaloriePage(),
-                  settings: settings,
-                );
-              },
-            ),
+            // Navigator(
+            //   onGenerateRoute: (RouteSettings settings) {
+            //     return MaterialPageRoute(
+            //       builder: (BuildContext context) => CaloriePage(),
+            //       settings: settings,
+            //     );
+            //   },
+            // ),
             Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
@@ -110,12 +109,12 @@ class _BottomBarState extends State<BottomBar> {
             items: [
               const BottomNavigationBarItem(
                   icon: Icon(Mdi.home), label: 'Home'),
-              const BottomNavigationBarItem(
-                  icon: Icon(Mdi.robot), label: 'Planner'),
+              // const BottomNavigationBarItem(
+              //     icon: Icon(Mdi.robot), label: 'Planner'),
               const BottomNavigationBarItem(
                   icon: Icon(Mdi.dumbbell), label: 'Workout'),
-              const BottomNavigationBarItem(
-                  icon: Icon(Mdi.calculator), label: 'Calories'),
+              // const BottomNavigationBarItem(
+              //     icon: Icon(Mdi.calculator), label: 'Calories'),
               const BottomNavigationBarItem(
                   icon: Icon(Mdi.face), label: 'Profile'),
             ],

@@ -29,6 +29,7 @@ class _BodyState extends State<Body> {
     checkLoginStatus();
     startTimer();
     checkLoginStatusGoogle();
+    navigateToNextScreen();
   }
 
   @override
@@ -63,6 +64,25 @@ class _BodyState extends State<Body> {
 
   void refresh() {
     setState(() {});
+  }
+
+  void navigateToNextScreen() async {
+    // Delay for 1 second
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (isUserLoggedIn || isUserLoggedInGoogle) {
+      // User is logged in, navigate to Home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      // User is not logged in, navigate to Sign In screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SignIn()),
+      );
+    }
   }
 
   final List<Map<String, String>> splashData = [
@@ -114,10 +134,10 @@ class _BodyState extends State<Body> {
                 (index) => buildDot(index),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: showButton(currentPage),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: showButton(currentPage),
+            // ),
           ],
         ),
       );
@@ -137,29 +157,35 @@ class _BodyState extends State<Body> {
     );
   }
 
-  Widget showButton(index) {
+  Widget showButton(int index) {
     if (index >= 0) {
       if (isUserLoggedIn || isUserLoggedInGoogle) {
         return Container(
           height: 70,
           width: 300,
           child: DefaultButton(
-              text: "Home",
-              press: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage()));
-              }),
+            text: "Home",
+            press: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
         );
       } else {
         return Container(
           height: 70,
           width: 300,
           child: DefaultButton(
-              text: "SiginIn",
-              press: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => SignIn()));
-              }),
+            text: "SignIn",
+            press: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignIn()),
+              );
+            },
+          ),
         );
       }
     } else {

@@ -427,9 +427,6 @@ class _FeedPageState extends State<FeedPage> {
               ),
             ),
           ),
-          // appBar: AppBar(
-          //   title: const Text("No Workouts Done Bro Come on !!"),
-          // ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -458,22 +455,6 @@ class _FeedPageState extends State<FeedPage> {
               SizedBox(
                 height: 50,
               ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) => StartWorkoutPage(
-              //           gifsList: [],
-              //           rotName: '',
-              //           routineItems: [],
-              //           isEmptyWorkout: true,
-              //         ),
-              //       ),
-              //     );
-              //   },
-              //   child: Text('Start Workout'),
-              // )
             ],
           ),
         ),

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymbro/constants.dart';
 import 'package:gymbro/home/bottom_nav.dart';
-import 'package:gymbro/home/my_routine_page.dart';
+import 'package:gymbro/home/home_page.dart';
 import 'package:gymbro/workoutpages/start_workout.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_picker/image_picker.dart';
